@@ -1,14 +1,14 @@
-import bcrypt
 from flask import render_template, flash, redirect, url_for
 from flask.ext.login import login_user, logout_user, current_user, login_required
+from flask.ext.bcrypt import Bcrypt
 from app import app, db, login_manager
 from .models import User
 from .forms import LoginForm
 
 
 @login_manager.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+def load_user(email):
+    return User.query.filter(User.email == email).first()
 
 
 @app.errorhandler(401)
@@ -37,12 +37,13 @@ def index():
 def login():
     """For GET requests, display the login form. For POSTS, login the current user
     by processing the form."""
+    bcrypt = Bcrypt(app)
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.get(form.email.data)
         if user:
             if bcrypt.check_password_hash(user.password, form.password.data):
-                flash(u'Successfully logged in as %s' % form.user.email)
+                flash("Successfully logged in as %s" % user.email)
                 user.authenticated = True
                 db.session.add(user)
                 db.session.commit()
@@ -60,4 +61,4 @@ def logout():
     db.session.add(user)
     db.session.commit()
     logout_user()
-    return render_template("logout.html")
+    return redirect(url_for('index'))
