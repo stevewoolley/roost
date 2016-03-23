@@ -1,33 +1,55 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+            crossorigin="anonymous"></script>
+    <!-- Custom styles for this template -->
+    <link href="static/signin.css" rel="stylesheet">
 
-{% block content %}
-<script type="text/javascript">
-function set_openid(openid, pr)
-{
-    u = openid.search('<username>')
-    if (u != -1) {
-        // openid requires username
-        user = prompt('Enter your ' + pr + ' username:')
-        openid = openid.substr(0, u) + user
-    }
-    form = document.forms['login'];
-    form.elements['openid'].value = openid
-}
-</script>
-<h1>Sign In</h1>
-<form action="" method="post" name="login">
-    {{ form.hidden_tag() }}
-    <p>
-        Please enter your OpenID, or select one of the providers below:<br>
-        {{ form.openid(size=80) }}
-        {% for error in form.openid.errors %}
-          <span style="color: red;">[{{error}}]</span>
-        {% endfor %}<br>
-        |{% for pr in providers %}
-          <a href="javascript:set_openid('{{ pr.url }}', '{{ pr.name }}');">{{ pr.name }}</a> |
+    {% if title %}
+    <title>{{ title }}</title>
+    {% else %}
+    <title>{{ config['SITE_NAME'] }}</title>
+    {% endif %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container">
+    <form method="POST" action="/login" class="form-signin">
+        {% for field in form.errors %}
+        {% for error in form.errors[field] %}
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                    aria-hidden="true">&times;</span>
+            </button>
+            {{ field }}: {{ error }}
+        </div>
         {% endfor %}
-    </p>
-    <p>{{ form.remember_me }} Remember Me</p>
-    <p><input type="submit" value="Sign In"></p>
-</form>
-{% endblock %}
+        {% endfor %}
+        <h2 class="form-signin-heading">Please sign in</h2>
+        {{ form.hidden_tag() }}
+        {{ form.email.label(class_="sr-only") }} {{ form.email(class_="form-control", placeholder="Email address",
+        required=true, autofocus="autofocus") }}
+        {{ form.password.label(class_="sr-only") }} {{ form.password(class_="form-control", placeholder="Password",
+        required=true) }}
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" value="remember-me"> Remember me
+            </label>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+</div>
+</body>
+</html>

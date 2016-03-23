@@ -1,14 +1,31 @@
+import bcrypt
 from flask import render_template, flash, redirect, url_for
-from flask.ext.login import login_user, logout_user, current_user, \
-    login_required
-from app import app, db, lm
-from oauth import OAuthSignIn
-from .forms import LoginForm
+from flask.ext.login import login_user, logout_user, current_user, login_required
+from app import app, db, login_manager
 from .models import User
+from .forms import LoginForm
 
-@lm.user_loader
+
+@login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+
+@app.errorhandler(401)
+def unauthorized(error):
+    return render_template('401.html'), 401
+
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html'), 500
+
 
 @app.route('/')
 @app.route('/index')
@@ -16,45 +33,31 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
-
-
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    """For GET requests, display the login form. For POSTS, login the current user
+    by processing the form."""
     form = LoginForm()
     if form.validate_on_submit():
-        flash('Login requested for OpenID="%s", remember_me=%s' %
-              (form.openid.data, str(form.remember_me.data)))
-        return redirect('/index')
-    return render_template('login.html',
-                           title='Sign In',
-                           form=form)
+        user = User.query.get(form.email.data)
+        if user:
+            if bcrypt.check_password_hash(user.password, form.password.data):
+                flash(u'Successfully logged in as %s' % form.user.email)
+                user.authenticated = True
+                db.session.add(user)
+                db.session.commit()
+                login_user(user, remember=True)
+                return redirect(url_for('index'))
+    return render_template("login.html", form=form)
 
 
-@app.route('/authorize/<provider>')
-def oauth_authorize(provider):
-    if not current_user.is_anonymous:
-        return redirect(url_for('index'))
-    oauth = OAuthSignIn.get_provider(provider)
-    return oauth.authorize()
-
-
-@app.route('/callback/<provider>')
-def oauth_callback(provider):
-    if not current_user.is_anonymous:
-        return redirect(url_for('index'))
-    oauth = OAuthSignIn.get_provider(provider)
-    social_id, username, email = oauth.callback()
-    if social_id is None:
-        flash('Authentication failed.')
-        return redirect(url_for('index'))
-    user = User.query.filter_by(social_id=social_id).first()
-    if not user:
-        user = User(social_id=social_id, nickname=username, email=email)
-        db.session.add(user)
-        db.session.commit()
-    (user, True)
-    return redirect(url_for('index'))
+@app.route("/logout", methods=["GET"])
+@login_required
+def logout():
+    """Logout the current user."""
+    user = current_user
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
+    logout_user()
+    return render_template("logout.html")
