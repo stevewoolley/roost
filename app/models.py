@@ -41,8 +41,12 @@ class Certificate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
     created_at = db.Column('created_at', DateTime, default=datetime.datetime.now)
-    things = db.relationship('Thing', backref='certificate',
-                            lazy='dynamic')
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return self.name
 
 class Thing(db.Model):
     __tablename__ = 'things'
@@ -52,3 +56,8 @@ class Thing(db.Model):
     endpoint = db.Column(db.String(250), nullable=False)
     created_at = db.Column('created_at', DateTime, default=datetime.datetime.now)
     certificate_id = db.Column(db.Integer, db.ForeignKey('certificates.id'))
+    certificate = db.relationship('Certificate',
+                               backref=db.backref('things', lazy='dynamic'))
+
+    def __repr__(self):
+        return '<Thing %r>' % self.name

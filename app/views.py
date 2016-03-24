@@ -4,7 +4,8 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from flask.ext.bcrypt import Bcrypt
 from app import app, db, login_manager
 from .models import User, Certificate, Thing
-from .forms import LoginForm, CertificateUploadForm
+from .forms import LoginForm, CertificateUploadForm, ThingForm
+import sqlalchemy
 
 
 @login_manager.user_loader
@@ -111,7 +112,7 @@ def new_certificate():
             flash("Must enter two files")
             return render_template('new-certificate.html', form=form)
         # store certificate record
-        certificate = Certificate(name=request.form['name'])
+        certificate = Certificate(name=form.name.data)
         db.session.add(certificate)
         db.session.commit()
         my_id = certificate.id
@@ -124,3 +125,27 @@ def new_certificate():
             filedata=filedata)
     else:
         return render_template("new-certificate.html", form=form)
+
+
+@app.route('/new-thing', methods=["GET", "POST"])
+def new_thing():
+    form = ThingForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            thing = Thing(name=form.name.data, endpoint=form.endpoint.data,
+                          certificate=form.certificate.data)
+            try:
+                db.session.add(thing)
+                db.session.commit()
+                flash("%s added successfully" % thing.name)
+            except sqlalchemy.exc.IntegrityError, exc:
+                reason = exc.message
+                if "UNIQUE constraint" in reason:
+                    flash("%s already exists" % exc.params[0])
+                db.session.rollback()
+
+        return render_template(
+            'new-thing.html',
+            form=form)
+    else:
+        return render_template("new-thing.html", form=form)

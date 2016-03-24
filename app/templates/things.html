@@ -2,12 +2,15 @@
 {% block content %}
 {% include 'flash.html' %}
 <h2>Things</h2>
+<a class="btn btn-primary btn-sm" href="{{ url_for('new_thing') }}">New</a>
+
 <table class="table">
     <thead>
     <tr>
         <th>ID</th>
         <th>Name</th>
         <th>Endpoint</th>
+        <th>Certs</th>
         <th>Created</th>
     </tr>
     </thead>
@@ -17,7 +20,8 @@
         <td>{{ thing.id }}</td>
         <td>{{ thing.name }}</td>
         <td>{{ thing.endpoint }}</td>
-        <td>{{ thing.created_at }}</td>
+        <td>{{ thing.certificate.name }}</td>
+        <td>{{ thing.created_at.strftime('%Y/%m/%d %-I:%M %p') }}</td>
     </tr>
     {%- endfor %}
     </tbody>
