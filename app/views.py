@@ -1,9 +1,10 @@
-from flask import render_template, flash, redirect, url_for
+import os
+from flask import request, render_template, flash, redirect, url_for
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from flask.ext.bcrypt import Bcrypt
 from app import app, db, login_manager
 from .models import User, Certificate, Thing
-from .forms import LoginForm, FileUploadForm
+from .forms import LoginForm, CertificateUploadForm
 
 
 @login_manager.user_loader
@@ -72,7 +73,7 @@ def logout():
 
 @app.route("/users", methods=["GET"])
 @login_required
-def users():
+def get_users():
     return render_template(
         'users.html',
         users=User.query.all())
@@ -80,7 +81,7 @@ def users():
 
 @app.route("/certificates", methods=["GET"])
 @login_required
-def certificates():
+def get_certificates():
     return render_template(
         'certificates.html',
         certificates=Certificate.query.all())
@@ -88,21 +89,38 @@ def certificates():
 
 @app.route("/things", methods=["GET"])
 @login_required
-def things():
+def get_things():
     return render_template(
         'things.html',
         things=Thing.query.all())
 
 
-@app.route('/upload', methods=("GET", "POST",))
-def upload():
-    form = FileUploadForm()
-    for i in xrange(2):
-        form.uploads.append_entry()
-    filedata = []
-    if form.validate_on_submit():
-        for upload in form.uploads.entries:
-            filedata.append(upload)
-    return render_template("upload.html",
-                           form=form,
-                           filedata=filedata)
+@app.route('/new-certificate', methods=["GET", "POST"])
+def new_certificate():
+    form = CertificateUploadForm()
+    if request.method == 'POST':
+        # validate uploads
+        filedata = []
+        two_good_files = True
+        if form.validate_on_submit():
+            for upload in form.uploads.entries:
+                filedata.append(upload)
+                if not upload.data.filename:  # file is invalid if filename empty
+                    two_good_files = False
+        if not two_good_files:
+            flash("Must enter two files")
+            return render_template('new-certificate.html', form=form)
+        # store certificate record
+        certificate = Certificate(name=request.form['name'])
+        db.session.add(certificate)
+        db.session.commit()
+        my_id = certificate.id
+        # store the physical files not that I have an id
+        filedata[0].data.save(os.path.join(app.config['CERTIFICATES_FOLDER'], str(my_id) + '-cert.pem'))
+        filedata[1].data.save(os.path.join(app.config['CERTIFICATES_FOLDER'], str(my_id) + '-key.pem'))
+        return render_template(
+            'new-certificate.html',
+            form=form,
+            filedata=filedata)
+    else:
+        return render_template("new-certificate.html", form=form)

@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 {% include 'flash.html' %}
-<h2>Upload Certificates</h2>
+<h2>New Certificate</h2>
 
 <form method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
-
+    <div class="form-group">
+        {{ form.name.label('Name') }} {{ form.name(class_="form-control",placeholder="Optional") }}
+    </div>
+    {% if filedata|length == 0 %}
     <div class="form-group">
         <label for="uploads-0">Client Certificate File</label>
         <input type="file" id="uploads-0" name="uploads-0">
@@ -17,5 +20,12 @@
     <p>
         <input type="submit" class="btn btn-default" value="Submit">
     </p>
+    {% else %}
+    <ul>
+        {%- for file in filedata %}
+        <li>{{ file.data.filename }}</li>
+        {%- endfor %}
+    </ul>
+    {% endif %}
 </form>
 {% endblock %}

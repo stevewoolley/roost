@@ -15,7 +15,7 @@
     <tr>
         <td>{{ certificate.id }}</td>
         <td>{{ certificate.name }}</td>
-        <td>{{ certificate.created_at }}</td>
+        <td>{{ certificate.created_at.strftime('%Y/%m/%d %-I:%M %p') }}</td>
     </tr>
     {%- endfor %}
     </tbody>

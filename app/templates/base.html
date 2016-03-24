@@ -39,9 +39,9 @@
                 {% if current_user.is_authenticated %}
                 <li><a href="#">Link</a></li>
                 {% if current_user.is_admin %}
-                <li><a href="{{ url_for('users') }}">Users</a></li>
-                <li><a href="{{ url_for('certificates') }}">Certificates</a></li>
-                <li><a href="{{ url_for('things') }}">Things</a></li>
+                <li><a href="{{ url_for('get_users') }}">Users</a></li>
+                <li><a href="{{ url_for('get_certificates') }}">Certificates</a></li>
+                <li><a href="{{ url_for('get_things') }}">Things</a></li>
                 {% endif %}
                 {% endif %}
             </ul>
