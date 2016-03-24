@@ -1,4 +1,7 @@
 from app import db
+from sqlalchemy import DateTime
+import datetime
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -7,7 +10,7 @@ class User(db.Model):
     password = db.Column(db.String)
     authenticated = db.Column(db.Boolean, default=False)
     active = db.Column(db.Boolean, default=False)
-
+    admin = db.Column(db.Boolean, default=False)
 
     @property
     def is_authenticated(self):
@@ -18,6 +21,10 @@ class User(db.Model):
         return self.active
 
     @property
+    def is_admin(self):
+        return self.admin
+
+    @property
     def is_anonymous(self):
         return False
 
@@ -25,4 +32,21 @@ class User(db.Model):
         return self.email
 
     def __repr__(self):
-        return '<User %r>' % (self.email)
+        return self.email
+
+
+class Certificate(db.Model):
+    __tablename__ = 'certificates'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    created_at = db.Column('created_at', DateTime, default=datetime.datetime.now)
+
+
+class Thing(db.Model):
+    __tablename__ = 'things'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    endpoint = db.Column(db.String(250))
+    created_at = db.Column('created_at', DateTime, default=datetime.datetime.now)

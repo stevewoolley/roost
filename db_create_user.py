@@ -25,7 +25,7 @@ def main():
         password = getpass()
         assert password == getpass('Password (again):')
 
-        user = User(email=email, password=bcrypt.generate_password_hash(password), active=True)
+        user = User(email=email, password=bcrypt.generate_password_hash(password), active=True, admin=True)
         db.session.add(user)
         db.session.commit()
         print 'User added.'

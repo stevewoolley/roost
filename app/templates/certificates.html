@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'flash.html' %}
+<h2>Certificates</h2>
+<table class="table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Created</th>
+    </tr>
+    </thead>
+    <tbody>
+    {%- for certificate in certificates %}
+    <tr>
+        <td>{{ certificate.id }}</td>
+        <td>{{ certificate.name }}</td>
+        <td>{{ certificate.created_at }}</td>
+    </tr>
+    {%- endfor %}
+    </tbody>
+</table>
+{% endblock %}

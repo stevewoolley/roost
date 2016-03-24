@@ -8,6 +8,7 @@
         <th>Email</th>
         <th>Active</th>
         <th>Authenticated</th>
+        <th>Admin</th>
     </tr>
     </thead>
     <tbody>
@@ -16,6 +17,7 @@
         <td>{{ user.email }}</td>
         <td>{{ user.active }}</td>
         <td>{{ user.authenticated }}</td>
+        <td>{{ user.admin }}</td>
     </tr>
     {%- endfor %}
     </tbody>

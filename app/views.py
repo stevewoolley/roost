@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from flask.ext.bcrypt import Bcrypt
 from app import app, db, login_manager
-from .models import User
+from .models import User, Certificate, Thing
 from .forms import LoginForm
 
 
@@ -50,7 +50,10 @@ def login():
                 login_user(user, remember=True)
                 return redirect(url_for('index'))
             else:
-                form.password.errors.append('invalid')
+                if user.is_active:
+                    form.password.errors.append('invalid')
+                else:
+                    form.password.errors.append('locked')
     return render_template("login.html", form=form)
 
 
@@ -73,3 +76,18 @@ def users():
     return render_template(
         'users.html',
         users=User.query.all())
+
+
+@app.route("/certificates", methods=["GET"])
+@login_required
+def certificates():
+    return render_template(
+        'certificates.html',
+        certificates=Certificate.query.all())
+
+@app.route("/things", methods=["GET"])
+@login_required
+def things():
+    return render_template(
+        'things.html',
+        things=Thing.query.all())
