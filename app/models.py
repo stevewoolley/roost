@@ -6,6 +6,8 @@ class User(db.Model):
     email = db.Column(db.String, primary_key=True)
     password = db.Column(db.String)
     authenticated = db.Column(db.Boolean, default=False)
+    active = db.Column(db.Boolean, default=False)
+
 
     @property
     def is_authenticated(self):
@@ -13,7 +15,7 @@ class User(db.Model):
 
     @property
     def is_active(self):
-        return True
+        return self.active
 
     @property
     def is_anonymous(self):

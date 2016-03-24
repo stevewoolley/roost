@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'flash.html' %}
+<h2>Users</h2>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Email</th>
+        <th>Active</th>
+        <th>Authenticated</th>
+    </tr>
+    </thead>
+    <tbody>
+    {%- for user in users %}
+    <tr>
+        <td>{{ user.email }}</td>
+        <td>{{ user.active }}</td>
+        <td>{{ user.authenticated }}</td>
+    </tr>
+    {%- endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -42,13 +42,15 @@ def login():
     if form.validate_on_submit():
         user = User.query.get(form.email.data)
         if user:
-            if bcrypt.check_password_hash(user.password, form.password.data):
+            if bcrypt.check_password_hash(user.password, form.password.data) and user.is_active:
                 flash("Successfully logged in as %s" % user.email)
                 user.authenticated = True
                 db.session.add(user)
                 db.session.commit()
                 login_user(user, remember=True)
                 return redirect(url_for('index'))
+            else:
+                form.password.errors.append('invalid')
     return render_template("login.html", form=form)
 
 
@@ -61,4 +63,13 @@ def logout():
     db.session.add(user)
     db.session.commit()
     logout_user()
+    flash("User logged out")
     return redirect(url_for('index'))
+
+
+@app.route("/users", methods=["GET"])
+@login_required
+def users():
+    return render_template(
+        'users.html',
+        users=User.query.all())
