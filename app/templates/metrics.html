@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'flash.html' %}
+<h2>Metrics</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    {%- for thing in things %}
+    <tr>
+        <td>{{ thing.name }}</td>
+    </tr>
+    {%- endfor %}
+    </tbody>
+</table>
+{% endblock %}

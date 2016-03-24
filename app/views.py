@@ -96,6 +96,14 @@ def get_things():
         things=Thing.query.all())
 
 
+@app.route("/metrics", methods=["GET"])
+@login_required
+def get_metrics():
+    return render_template(
+        'metrics.html',
+        things=Thing.query.all())
+
+
 @app.route('/new-certificate', methods=["GET", "POST"])
 def new_certificate():
     form = CertificateUploadForm()
