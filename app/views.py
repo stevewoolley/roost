@@ -3,7 +3,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from flask.ext.bcrypt import Bcrypt
 from app import app, db, login_manager
 from .models import User, Certificate, Thing
-from .forms import LoginForm
+from .forms import LoginForm, FileUploadForm
 
 
 @login_manager.user_loader
@@ -85,9 +85,24 @@ def certificates():
         'certificates.html',
         certificates=Certificate.query.all())
 
+
 @app.route("/things", methods=["GET"])
 @login_required
 def things():
     return render_template(
         'things.html',
         things=Thing.query.all())
+
+
+@app.route('/upload', methods=("GET", "POST",))
+def upload():
+    form = FileUploadForm()
+    for i in xrange(2):
+        form.uploads.append_entry()
+    filedata = []
+    if form.validate_on_submit():
+        for upload in form.uploads.entries:
+            filedata.append(upload)
+    return render_template("upload.html",
+                           form=form,
+                           filedata=filedata)

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'flash.html' %}
+<h2>Upload Certificates</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+        <label for="uploads-0">Client Certificate File</label>
+        <input type="file" id="uploads-0" name="uploads-0">
+    </div>
+    <div class="form-group">
+        <label for="uploads-1">Client Key File</label>
+        <input type="file" id="uploads-1" name="uploads-1">
+    </div>
+    <p>
+        <input type="submit" class="btn btn-default" value="Submit">
+    </p>
+</form>
+{% endblock %}
