@@ -103,6 +103,14 @@ def get_metrics():
         'metrics.html',
         metrics=Metric.query.all())
 
+@app.route('/metrics/<int:metric_id>')
+@login_required
+def get_metric(metric_id):
+    return render_template(
+        'metric.html',
+        metric=Metric.query.get(metric_id))
+
+
 
 @app.route('/new-certificate', methods=["GET", "POST"])
 @login_required

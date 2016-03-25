@@ -3,19 +3,11 @@
 {% include 'flash.html' %}
 <h2>Metrics</h2>
 <a class="btn btn-primary btn-sm" href="{{ url_for('new_metric') }}">New</a>
-
-<table class="table">
-    <thead>
-    <tr>
-        <th>Name</th>
-    </tr>
-    </thead>
-    <tbody>
+<p>
+<div class="list-group">
     {%- for metric in metrics %}
-    <tr>
-        <td>{{ metric.thing.name }}</td>
-    </tr>
+    <a href="{{ url_for('get_metric', metric_id=metric.id) }}" class="list-group-item">{{ metric.thing.name }}</a>
     {%- endfor %}
-    </tbody>
-</table>
+</div>
+</p>
 {% endblock %}
