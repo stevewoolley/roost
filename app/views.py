@@ -105,6 +105,7 @@ def get_metrics():
 
 
 @app.route('/new-certificate', methods=["GET", "POST"])
+@login_required
 def new_certificate():
     form = CertificateUploadForm()
     if request.method == 'POST':
@@ -136,6 +137,7 @@ def new_certificate():
 
 
 @app.route('/new-thing', methods=["GET", "POST"])
+@login_required
 def new_thing():
     form = ThingForm()
     if request.method == 'POST':
@@ -160,6 +162,7 @@ def new_thing():
 
 
 @app.route('/new-metric', methods=["GET", "POST"])
+@login_required
 def new_metric():
     form = MetricForm()
     if request.method == 'POST':
@@ -172,11 +175,11 @@ def new_metric():
             except sqlalchemy.exc.IntegrityError, exc:
                 reason = exc.message
                 if "NOT NULL constraint" in reason:
-                    flash("Metric already exists",'danger')
+                    flash("Metric already exists", 'danger')
                 db.session.rollback()
 
             return render_template(
-            'new-metric.html',
-            form=form)
+                'new-metric.html',
+                form=form)
     else:
         return render_template("new-metric.html", form=form)
