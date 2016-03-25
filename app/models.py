@@ -68,5 +68,9 @@ class Metric(db.Model):
     thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
     thing = db.relationship('Thing', back_populates=('metric'))
 
+    @property
+    def items(self):
+        return {'foo': 'bar'}
+
     def __repr__(self):
         return self.thing.name
