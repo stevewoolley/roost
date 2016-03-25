@@ -7,7 +7,6 @@
 <table class="table">
     <thead>
     <tr>
-        <th>ID</th>
         <th>Name</th>
         <th>Endpoint</th>
         <th>Certs</th>
@@ -16,7 +15,6 @@
     <tbody>
     {%- for thing in things %}
     <tr>
-        <td>{{ thing.id }}</td>
         <td>{{ thing.name }}</td>
         <td>{{ thing.endpoint }}</td>
         <td>{{ thing.certificate.name }}</td>
