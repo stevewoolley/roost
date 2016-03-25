@@ -3,8 +3,8 @@ from flask import request, render_template, flash, redirect, url_for
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from flask.ext.bcrypt import Bcrypt
 from app import app, db, login_manager
-from .models import User, Certificate, Thing
-from .forms import LoginForm, CertificateUploadForm, ThingForm
+from .models import User, Certificate, Thing, Metric
+from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm
 import sqlalchemy
 
 
@@ -45,7 +45,7 @@ def login():
         user = User.query.get(form.email.data)
         if user:
             if bcrypt.check_password_hash(user.password, form.password.data) and user.is_active:
-                flash("Successfully logged in as %s" % user.email)
+                flash("Successfully logged in as %s" % user.email, 'success')
                 user.authenticated = True
                 db.session.add(user)
                 db.session.commit()
@@ -68,7 +68,7 @@ def logout():
     db.session.add(user)
     db.session.commit()
     logout_user()
-    flash("User logged out")
+    flash("User logged out", 'success')
     return redirect(url_for('index'))
 
 
@@ -101,7 +101,7 @@ def get_things():
 def get_metrics():
     return render_template(
         'metrics.html',
-        things=Thing.query.all())
+        metrics=Metric.query.all())
 
 
 @app.route('/new-certificate', methods=["GET", "POST"])
@@ -117,7 +117,7 @@ def new_certificate():
                 if not upload.data.filename:  # file is invalid if filename empty
                     two_good_files = False
         if not two_good_files:
-            flash("Must enter two files")
+            flash("Must enter two files", 'warning')
             return render_template('new-certificate.html', form=form)
         # store certificate record
         certificate = Certificate(name=form.name.data)
@@ -145,11 +145,11 @@ def new_thing():
             try:
                 db.session.add(thing)
                 db.session.commit()
-                flash("%s added successfully" % thing.name)
+                flash("%s added successfully" % thing.name, 'success')
             except sqlalchemy.exc.IntegrityError, exc:
                 reason = exc.message
                 if "UNIQUE constraint" in reason:
-                    flash("%s already exists" % exc.params[0])
+                    flash("%s already exists" % exc.params[0], 'danger')
                 db.session.rollback()
 
         return render_template(
@@ -157,3 +157,26 @@ def new_thing():
             form=form)
     else:
         return render_template("new-thing.html", form=form)
+
+
+@app.route('/new-metric', methods=["GET", "POST"])
+def new_metric():
+    form = MetricForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            metric = Metric(thing=form.thing.data)
+            try:
+                db.session.add(metric)
+                db.session.commit()
+                flash("%s added successfully" % metric.thing.name, 'success')
+            except sqlalchemy.exc.IntegrityError, exc:
+                reason = exc.message
+                if "NOT NULL constraint" in reason:
+                    flash("Metric already exists",'danger')
+                db.session.rollback()
+
+            return render_template(
+            'new-metric.html',
+            form=form)
+    else:
+        return render_template("new-metric.html", form=form)

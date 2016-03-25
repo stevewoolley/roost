@@ -2,6 +2,7 @@
 {% block content %}
 {% include 'flash.html' %}
 <h2>Metrics</h2>
+<a class="btn btn-primary btn-sm" href="{{ url_for('new_metric') }}">New</a>
 
 <table class="table">
     <thead>
@@ -10,9 +11,9 @@
     </tr>
     </thead>
     <tbody>
-    {%- for thing in things %}
+    {%- for metric in metrics %}
     <tr>
-        <td>{{ thing.name }}</td>
+        <td>{{ metric.thing.name }}</td>
     </tr>
     {%- endfor %}
     </tbody>

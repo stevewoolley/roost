@@ -42,11 +42,9 @@ class Certificate(db.Model):
     name = db.Column(db.String(50))
     created_at = db.Column('created_at', DateTime, default=datetime.datetime.now)
 
-    def __init__(self, name):
-        self.name = name
-
     def __repr__(self):
         return self.name
+
 
 class Thing(db.Model):
     __tablename__ = 'things'
@@ -54,10 +52,21 @@ class Thing(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     endpoint = db.Column(db.String(250), nullable=False)
-    created_at = db.Column('created_at', DateTime, default=datetime.datetime.now)
     certificate_id = db.Column(db.Integer, db.ForeignKey('certificates.id'))
     certificate = db.relationship('Certificate',
-                               backref=db.backref('things', lazy='dynamic'))
+                                  backref=db.backref('things', lazy='dynamic'))
+    metric = db.relationship('Metric', uselist=False, back_populates='thing')
 
     def __repr__(self):
-        return '<Thing %r>' % self.name
+        return self.name
+
+
+class Metric(db.Model):
+    __tablename__ = 'metrics'
+
+    id = db.Column(db.Integer, primary_key=True)
+    thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
+    thing = db.relationship('Thing', back_populates=('metric'))
+
+    def __repr__(self):
+        return self.thing.name
