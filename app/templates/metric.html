@@ -2,15 +2,13 @@
 {% block content %}
 {% include 'flash.html' %}
 <h2>{{ metric.thing.name }}</h2>
-<hr/>
 <table class="table">
     <tbody>
-    {% for key, value in metric.items.iteritems() %}
+    {% for key, value in metric.items.json()['state']['reported'].iteritems() %}
     <tr>
         <td>{{ key }}</td>
         <td>{{ value }}</td>
     </tr>
     {% endfor %}
     </tbody>
-</table>
-{% endblock %}
+</table>{% endblock %}

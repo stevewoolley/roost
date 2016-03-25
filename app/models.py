@@ -1,7 +1,8 @@
-from app import db
+from app import app, db
 from sqlalchemy import DateTime
 import datetime
-
+import requests
+import os
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -70,7 +71,12 @@ class Metric(db.Model):
 
     @property
     def items(self):
-        return {'foo': 'bar'}
+        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
+                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
+        headers = {'Content-Type': 'application/json'}
+        response = requests.get(self.thing.endpoint, cert=cert, verify=False, headers=headers)
+
+        return response
 
     def __repr__(self):
         return self.thing.name
