@@ -77,7 +77,6 @@ class Metric(db.Model):
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
         response = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
-
         return response
 
     def __repr__(self):
@@ -94,6 +93,17 @@ class Toggle(db.Model):
     off_str = db.Column(db.String(50), nullable=False)
     thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
     thing = db.relationship('Thing', backref=db.backref('toggles', lazy='dynamic'))
+
+    @property
+    def value(self):
+        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
+                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
+        headers = {'Content-Type': 'application/json'}
+        try:
+            response = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+            return response.json()['state']['reported'][self.refkey]
+        except:
+            return ''
 
     def __repr__(self):
         return self.title
