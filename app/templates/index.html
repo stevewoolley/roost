@@ -4,9 +4,7 @@
 
 <div class="page-header">
     {% if current_user.is_authenticated %}
-    <h2>Welcome</h2>
     {% else %}
-    <h4><a href="/login">Please Login</a></h4>
     {% endif %}
 </div>
 {% endblock %}
