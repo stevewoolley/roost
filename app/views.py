@@ -6,6 +6,7 @@ from app import app, db, login_manager
 from .models import User, Certificate, Thing, Metric
 from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm
 import sqlalchemy
+import datetime
 
 
 @login_manager.user_loader
@@ -103,13 +104,13 @@ def get_metrics():
         'metrics.html',
         metrics=Metric.query.all())
 
+
 @app.route('/metrics/<int:metric_id>')
 @login_required
 def get_metric(metric_id):
     return render_template(
         'metric.html',
         metric=Metric.query.get(metric_id))
-
 
 
 @app.route('/new-certificate', methods=["GET", "POST"])
@@ -191,3 +192,18 @@ def new_metric():
                 form=form)
     else:
         return render_template("new-metric.html", form=form)
+
+
+@app.template_filter('dt')
+def _jinja2_filter_datetime(date, fmt=None):
+    if fmt:
+        return date.strftime(fmt)
+    else:
+        return date.strftime('%Y/%m/%d %-I:%M %p')
+
+@app.template_filter('ts')
+def _jinja2_filter_timestamp(timestamp, fmt=None):
+    if fmt:
+        return datetime.datetime.fromtimestamp(timestamp).strftime(fmt)
+    else:
+        return datetime.datetime.fromtimestamp(timestamp).strftime('%Y/%m/%d %-I:%M %p')

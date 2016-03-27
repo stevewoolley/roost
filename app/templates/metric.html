@@ -1,14 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
 {% include 'flash.html' %}
-<h2>{{ metric.thing.name }}</h2>
-<table class="table">
-    <tbody>
-    {% for key, value in metric.items.json()['state']['reported'].iteritems() %}
-    <tr>
-        <td>{{ key }}</td>
-        <td>{{ value }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>{% endblock %}
+<div class="panel panel-default">
+    <div class="panel-heading">{{ metric.thing.name }}</div>
+
+    <!-- Table -->
+    <table class="table">
+        <tbody>
+        {% for key, value in metric.items.json()['state']['reported'].iteritems() %}
+        <tr>
+            <td>{{ key }}</td>
+            <td>
+                <div data-toggle="tooltip" title
+                     data-original-title="{{ metric.items.json()['metadata']['reported'][key]['timestamp']|ts }}"
+                     data-placement="left">{{ value }}
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

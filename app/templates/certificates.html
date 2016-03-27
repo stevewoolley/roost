@@ -14,7 +14,7 @@
     {%- for certificate in certificates %}
     <tr>
         <td>{{ certificate.name }}</td>
-        <td>{{ certificate.created_at.strftime('%Y/%m/%d %-I:%M %p') }}</td>
+        <td>{{ certificate.created_at|dt }}</td>
     </tr>
     {%- endfor %}
     </tbody>
