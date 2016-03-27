@@ -4,6 +4,7 @@ import datetime
 import requests
 import os
 
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -58,8 +59,9 @@ class Thing(db.Model):
                                   backref=db.backref('things', lazy='dynamic'))
     metric = db.relationship('Metric', uselist=False, back_populates='thing')
 
-    def __repr__(self):
-        return self.name
+
+def __repr__(self):
+    return self.name
 
 
 class Metric(db.Model):
@@ -80,3 +82,18 @@ class Metric(db.Model):
 
     def __repr__(self):
         return self.thing.name
+
+
+class Toggle(db.Model):
+    __tablename__ = 'toggles'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), unique=True, nullable=False)
+    refkey = db.Column(db.String(50), nullable=False)
+    on_str = db.Column(db.String(50), nullable=False)
+    off_str = db.Column(db.String(50), nullable=False)
+    thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
+    thing = db.relationship('Thing', backref=db.backref('toggles', lazy='dynamic'))
+
+    def __repr__(self):
+        return self.title

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'flash.html' %}
+<h2>Toggles</h2>
+<a class="btn btn-primary btn-sm" href="{{ url_for('new_toggle') }}">New</a>
+<p>
+<div class="list-group">
+    {%- for toggle in toggles %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{ toggle.title }}</h3>
+        </div>
+        <div class="panel-body">
+            {{ toggle.refkey }}
+        </div>
+    </div>
+    {%- endfor %}
+</div>
+</p>
+{% endblock %}

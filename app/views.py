@@ -3,8 +3,8 @@ from flask import request, render_template, flash, redirect, url_for
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from flask.ext.bcrypt import Bcrypt
 from app import app, db, login_manager
-from .models import User, Certificate, Thing, Metric
-from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm
+from .models import User, Certificate, Thing, Metric, Toggle
+from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm
 import sqlalchemy
 import datetime
 
@@ -113,6 +113,14 @@ def get_metric(metric_id):
         metric=Metric.query.get(metric_id))
 
 
+@app.route("/toggles", methods=["GET"])
+@login_required
+def get_toggles():
+    return render_template(
+        'toggles.html',
+        toggles=Toggle.query.all())
+
+
 @app.route('/new-certificate', methods=["GET", "POST"])
 @login_required
 def new_certificate():
@@ -193,6 +201,31 @@ def new_metric():
     else:
         return render_template("new-metric.html", form=form)
 
+@app.route('/new-toggle', methods=["GET", "POST"])
+@login_required
+def new_toggle():
+    form = ToggleForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            toggle = Toggle(title=form.title.data, refkey=form.refkey.data,
+                            on_str=form.on_str.data, off_str=form.off_str.data,
+                          thing=form.thing.data)
+            try:
+                db.session.add(toggle)
+                db.session.commit()
+                flash("Added successfully", 'success')
+            except sqlalchemy.exc.IntegrityError, exc:
+                reason = exc.message
+                if "UNIQUE constraint" in reason:
+                    flash("%s already exists" % exc.params[0], 'danger')
+                db.session.rollback()
+
+        return render_template(
+            'new-toggle.html',
+            form=form)
+    else:
+        return render_template("new-toggle.html", form=form)
+
 
 @app.template_filter('dt')
 def _jinja2_filter_datetime(date, fmt=None):
@@ -200,6 +233,7 @@ def _jinja2_filter_datetime(date, fmt=None):
         return date.strftime(fmt)
     else:
         return date.strftime('%Y/%m/%d %-I:%M %p')
+
 
 @app.template_filter('ts')
 def _jinja2_filter_timestamp(timestamp, fmt=None):

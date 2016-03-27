@@ -31,5 +31,14 @@ def enabled_things():
 
 class MetricForm(Form):
     thing_id = IntegerField('thing_id')
-    thing = QuerySelectField(query_factory=enabled_things,
+    thing = QuerySelectField(query_factory=enabled_things, get_label='name',
                                allow_blank=False)
+
+class ToggleForm(Form):
+    title = StringField('title', [validators.InputRequired(), validators.Length(max=100)])
+    refkey = StringField('refkey', [validators.InputRequired(), validators.Length(max=50)])
+    on_str = StringField('on_str', [validators.InputRequired(), validators.Length(max=50)])
+    off_str = StringField('off_str', [validators.InputRequired(), validators.Length(max=50)])
+    thing_id = IntegerField('thing_id')
+    thing = QuerySelectField(query_factory=enabled_things, get_label='name',
+                                 allow_blank=False)
