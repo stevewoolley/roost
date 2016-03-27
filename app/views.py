@@ -141,10 +141,9 @@ def new_certificate():
         certificate = Certificate(name=form.name.data)
         db.session.add(certificate)
         db.session.commit()
-        my_id = certificate.id
         # store the physical files not that I have an id
-        filedata[0].data.save(os.path.join(app.config['CERTIFICATES_FOLDER'], str(my_id) + '-cert.pem'))
-        filedata[1].data.save(os.path.join(app.config['CERTIFICATES_FOLDER'], str(my_id) + '-key.pem'))
+        filedata[0].data.save(os.path.join(app.config['CERTIFICATES_FOLDER'], str(certificate.id) + '-cert.pem'))
+        filedata[1].data.save(os.path.join(app.config['CERTIFICATES_FOLDER'], str(certificate.id) + '-key.pem'))
         return render_template(
             'new-certificate.html',
             form=form,

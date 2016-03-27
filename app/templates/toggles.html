@@ -3,18 +3,26 @@
 {% include 'flash.html' %}
 <div class="page-header"><h2>Toggles</h2></div>
 <a class="btn btn-primary btn-sm" href="{{ url_for('new_toggle') }}">New</a>
+
 <p>
-<div class="list-group">
-    {%- for toggle in toggles %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">{{ toggle.title }}</h3>
+<form method="POST">
+    <div class="row">
+
+        {%- for toggle in toggles %}
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">{{ toggle.title }}</h3>
+                </div>
+                <div class="panel-body">
+                    <p align="center">{{ toggle.value }}</p>
+                    <button type="button" class="btn btn-default btn-block">{{ toggle.not_value }}</button>
+
+                </div>
+            </div>
         </div>
-        <div class="panel-body">
-            <h2>{{ toggle.value }}</h2>
-        </div>
+        {%- endfor %}
     </div>
-    {%- endfor %}
-</div>
+</form>
 </p>
 {% endblock %}

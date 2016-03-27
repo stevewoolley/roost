@@ -2,9 +2,7 @@
 {% block content %}
 {% include 'flash.html' %}
 
-<div class="page-header">
-    {% if current_user.is_authenticated %}
-    {% else %}
-    {% endif %}
-</div>
+{% if current_user.is_authenticated %}
+{% else %}
+{% endif %}
 {% endblock %}

@@ -45,7 +45,7 @@ class Certificate(db.Model):
     created_at = db.Column('created_at', DateTime, default=datetime.datetime.now)
 
     def __repr__(self):
-        return self.name
+        return '<id {}>'.format(self.id)
 
 
 class Thing(db.Model):
@@ -59,9 +59,8 @@ class Thing(db.Model):
                                   backref=db.backref('things', lazy='dynamic'))
     metric = db.relationship('Metric', uselist=False, back_populates='thing')
 
-
-def __repr__(self):
-    return self.name
+    def __repr__(self):
+        return '<id {}>'.format(self.id)
 
 
 class Metric(db.Model):
@@ -80,7 +79,7 @@ class Metric(db.Model):
         return response
 
     def __repr__(self):
-        return self.thing.name
+        return '<id {}>'.format(self.id)
 
 
 class Toggle(db.Model):
@@ -95,15 +94,22 @@ class Toggle(db.Model):
     thing = db.relationship('Thing', backref=db.backref('toggles', lazy='dynamic'))
 
     @property
-    def value(self):
+    def response(self):
         cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
-        try:
-            response = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
-            return response.json()['state']['reported'][self.refkey]
-        except:
-            return ''
+        return requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+
+    @property
+    def value(self):
+        return self.response.json()['state']['reported'][self.refkey]
+
+    @property
+    def not_value(self):
+        if self.value == self.on_str:
+            return self.off_str
+        else:
+            return self.on_str
 
     def __repr__(self):
-        return self.title
+        return '<id {}>'.format(self.id)

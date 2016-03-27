@@ -21,7 +21,7 @@ def enabled_certificates():
 class ThingForm(Form):
     name = StringField('name', [validators.InputRequired(), validators.Length(max=50)])
     endpoint = StringField('endpoint', [validators.InputRequired(), validators.Length(max=250), validators.URL()])
-    certificate = QuerySelectField(query_factory=enabled_certificates,
+    certificate = QuerySelectField(query_factory=enabled_certificates, get_label='name',
                                    allow_blank=False)
 
 
