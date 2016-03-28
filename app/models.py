@@ -3,6 +3,7 @@ from sqlalchemy import DateTime
 import datetime
 import requests
 import os
+import json
 
 
 class User(db.Model):
@@ -71,15 +72,23 @@ class Metric(db.Model):
     thing = db.relationship('Thing', back_populates=('metric'))
 
     @property
-    def items(self):
+    def response(self):
         cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
-        response = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
-        return response
+        if not hasattr(self, 'resp'):
+            self.resp = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+        return self.resp
+
+    @property
+    def items(self):
+        return self.response
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
+
+    def __init__(self, resp):
+        self.resp = resp
 
 
 class Toggle(db.Model):
@@ -98,11 +107,24 @@ class Toggle(db.Model):
         cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
-        return requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+        if not hasattr(self, 'resp'):
+            self.resp = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+        return self.resp
 
     @property
     def value(self):
         return self.response.json()['state']['reported'][self.refkey]
+
+    @value.setter
+    def value(self, v):
+        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
+                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
+        headers = {'Content-Type': 'application/json'}
+        data = {}
+        data["state"] = {}
+        data["state"]["desired"] = {}
+        data["state"]["desired"][self.refkey] = v
+        requests.post(self.thing.endpoint, data=json.dumps(data), cert=cert, verify=True, headers=headers)
 
     @property
     def not_value(self):
@@ -113,3 +135,6 @@ class Toggle(db.Model):
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
+
+    def __init__(self, resp):
+        self.resp = resp

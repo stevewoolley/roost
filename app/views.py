@@ -113,12 +113,19 @@ def get_metric(metric_id):
         metric=Metric.query.get(metric_id))
 
 
-@app.route("/toggles", methods=["GET"])
+@app.route("/toggles", methods=["GET", "POST"])
 @login_required
 def get_toggles():
-    return render_template(
-        'toggles.html',
-        toggles=Toggle.query.all())
+    if request.method == 'POST':
+        toggle = Toggle.query.get(int(request.form['submit'].split('-',1)[0]))
+        toggle.value = request.form['submit'].split('-',1)[1]
+        return render_template(
+            'toggles.html',
+            toggles=Toggle.query.all())
+    else:
+        return render_template(
+            'toggles.html',
+            toggles=Toggle.query.all())
 
 
 @app.route('/new-certificate', methods=["GET", "POST"])

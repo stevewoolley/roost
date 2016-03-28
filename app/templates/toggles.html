@@ -16,8 +16,7 @@
                 </div>
                 <div class="panel-body">
                     <p align="center">{{ toggle.value }}</p>
-                    <button type="button" class="btn btn-default btn-block">{{ toggle.not_value }}</button>
-
+                    <button type="submit" class="btn btn-default btn-block" name="submit" value="{{ toggle.id }}-{{ toggle.not_value }}">{{ toggle.not_value }}</button>
                 </div>
             </div>
         </div>
