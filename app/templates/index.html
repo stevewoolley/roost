@@ -4,5 +4,8 @@
 
 {% if current_user.is_authenticated %}
 {% else %}
+<div class="row">
+  <div class="span1"><img class="img-responsive center-block" src="static/home.png"/></div>
+</div>
 {% endif %}
 {% endblock %}
