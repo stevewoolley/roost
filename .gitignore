@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+/env
+
+# private stuff
+*.pem
+
+# idea stuff
+/.idea/*
+
+#
+config.py
+app.db
+
+
