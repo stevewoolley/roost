@@ -1,0 +1,4 @@
+flask-login
+flask-mail
+flask-whooshalchemy
+bcrypt
