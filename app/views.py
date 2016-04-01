@@ -7,6 +7,7 @@ from .models import User, Certificate, Thing, Metric, Toggle
 from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm
 import sqlalchemy
 import datetime
+import pytz
 
 
 @login_manager.user_loader
@@ -238,12 +239,12 @@ def _jinja2_filter_datetime(date, fmt=None):
     if fmt:
         return date.strftime(fmt)
     else:
-        return date.strftime('%Y/%m/%d %-I:%M %p')
+        return date.strftime('%Y/%m/%d %-I:%M %p %Z')
 
 
 @app.template_filter('ts')
 def _jinja2_filter_timestamp(timestamp, fmt=None):
     if fmt:
-        return datetime.datetime.fromtimestamp(timestamp).strftime(fmt)
+        return datetime.datetime.fromtimestamp(timestamp,pytz.timezone("America/New_York")).strftime(fmt)
     else:
-        return datetime.datetime.fromtimestamp(timestamp).strftime('%Y/%m/%d %-I:%M %p')
+        return datetime.datetime.fromtimestamp(timestamp,pytz.timezone("America/New_York")).strftime('%Y/%m/%d %-I:%M %p %Z')
