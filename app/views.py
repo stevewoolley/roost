@@ -3,8 +3,8 @@ from flask import request, render_template, flash, redirect, url_for
 from flask.ext.login import login_user, logout_user, current_user, login_required
 from flask.ext.bcrypt import Bcrypt
 from app import app, db, login_manager
-from .models import User, Certificate, Thing, Metric, Toggle
-from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm
+from .models import User, Certificate, Thing, Metric, Toggle, Snapshot
+from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm, SnapshotForm
 import sqlalchemy
 import datetime
 import pytz
@@ -110,7 +110,8 @@ def get_metrics():
 @login_required
 def get_snapshots():
     return render_template(
-        'snapshots.html')
+        'snapshots.html',
+        snapshots=Snapshot.query.all())
 
 
 @app.route('/metrics/<int:metric_id>')
@@ -190,6 +191,29 @@ def new_thing():
             form=form)
     else:
         return render_template("new-thing.html", form=form)
+
+@app.route('/new-snapshot', methods=["GET", "POST"])
+@login_required
+def new_snapshot():
+    form = SnapshotForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            snapshot = Snapshot(thing=form.thing.data)
+            try:
+                db.session.add(snapshot)
+                db.session.commit()
+                flash("%s added successfully" % snapshot.thing.name, 'success')
+            except sqlalchemy.exc.IntegrityError, exc:
+                reason = exc.message
+                if "NOT NULL constraint" in reason:
+                    flash("Snapshot already exists", 'danger')
+                db.session.rollback()
+
+        return render_template(
+            'new-snapshot.html',
+            form=form)
+    else:
+        return render_template("new-snapshot.html", form=form)
 
 
 @app.route('/new-metric', methods=["GET", "POST"])

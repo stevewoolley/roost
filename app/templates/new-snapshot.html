@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+{% include 'flash.html' %}
+<div class="page-header"><h2>New Snapshot</h2></div>
+
+<form method="POST">
+    {% include 'form-errors.html' %}
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.thing_id.label('Thing') }} {{ form.thing(class_="form-control") }}
+    </div>
+    <input type="submit" class="btn btn-primary" value="Submit">
+</form>
+{% endblock %}

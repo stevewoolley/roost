@@ -6,17 +6,19 @@
 <p>
 <form method="POST">
     <div class="row">
-
+        {%- for snapshot in snapshots %}
         <div class="col-md-3">
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <h3 class="panel-title">pi7</h3>
+                    <h3 class="panel-title">{{ snapshot.thing.name }}</h3>
                 </div>
                 <div class="panel-body">
-                    <div class="span1"><img class="img-responsive center-block" src="https://s3.amazonaws.com/swoolley-iot/pi7/snapshot.png"/></div>
+                    <div class="span1"><img class="img-responsive center-block"
+                                            src="https://s3.amazonaws.com/{{ config['S3_BUCKET']}}/{{ snapshot.thing.name }}/{{ config['SNAPSHOT']}}"/></div>
                 </div>
             </div>
         </div>
+        {%- endfor %}
     </div>
 </form>
 </p>

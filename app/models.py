@@ -59,8 +59,10 @@ class Thing(db.Model):
     certificate = db.relationship('Certificate',
                                   backref=db.backref('things', lazy='dynamic'))
     metric = db.relationship('Metric', uselist=False, back_populates='thing')
+    snapshot = db.relationship('Snapshot', uselist=False, back_populates='thing')
 
-    def __repr__(self):
+
+def __repr__(self):
         return '<id {}>'.format(self.id)
 
 
@@ -138,3 +140,14 @@ class Toggle(db.Model):
 
     def __init__(self, resp):
         self.resp = resp
+
+
+class Snapshot(db.Model):
+    __tablename__ = 'snapshots'
+
+    id = db.Column(db.Integer, primary_key=True)
+    thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
+    thing = db.relationship('Thing', back_populates=('snapshot'))
+
+    def __repr__(self):
+        return '<id {}>'.format(self.id)

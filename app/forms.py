@@ -4,6 +4,7 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from .models import Certificate, Thing
 from sqlalchemy.orm import load_only
 
+
 class LoginForm(Form):
     email = StringField('email', [validators.DataRequired(), validators.Email()])
     password = PasswordField('password', [validators.Length(min=6, max=35)])
@@ -32,7 +33,14 @@ def enabled_things():
 class MetricForm(Form):
     thing_id = IntegerField('thing_id')
     thing = QuerySelectField(query_factory=enabled_things, get_label='name',
-                               allow_blank=False)
+                             allow_blank=False)
+
+
+class SnapshotForm(Form):
+    thing_id = IntegerField('thing_id')
+    thing = QuerySelectField(query_factory=enabled_things, get_label='name',
+                             allow_blank=False)
+
 
 class ToggleForm(Form):
     title = StringField('title', [validators.InputRequired(), validators.Length(max=100)])
@@ -41,4 +49,4 @@ class ToggleForm(Form):
     off_str = StringField('off_str', [validators.InputRequired(), validators.Length(max=50)])
     thing_id = IntegerField('thing_id')
     thing = QuerySelectField(query_factory=enabled_things, get_label='name',
-                                 allow_blank=False)
+                             allow_blank=False)
