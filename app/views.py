@@ -95,7 +95,7 @@ def get_certificates():
 def get_things():
     return render_template(
         'things.html',
-        things=Thing.query.all())
+        things=Thing.query.order_by("name").all())
 
 
 @app.route("/metrics", methods=["GET"])
@@ -103,7 +103,7 @@ def get_things():
 def get_metrics():
     return render_template(
         'metrics.html',
-        metrics=Metric.query.all())
+        metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all())
 
 
 @app.route("/snapshots", methods=["GET"])
@@ -111,7 +111,7 @@ def get_metrics():
 def get_snapshots():
     return render_template(
         'snapshots.html',
-        snapshots=Snapshot.query.all())
+        snapshots=Snapshot.query.join(Thing, Snapshot.thing_id == Thing.id).order_by("things.name").all())
 
 
 @app.route('/metrics/<int:metric_id>')
@@ -134,7 +134,7 @@ def get_toggles():
     else:
         return render_template(
             'toggles.html',
-            toggles=Toggle.query.all())
+            toggles=Toggle.query.order_by("title").all())
 
 
 @app.route('/new-certificate', methods=["GET", "POST"])
