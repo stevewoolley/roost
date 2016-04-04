@@ -106,6 +106,13 @@ def get_metrics():
         metrics=Metric.query.all())
 
 
+@app.route("/snapshots", methods=["GET"])
+@login_required
+def get_snapshots():
+    return render_template(
+        'snapshots.html')
+
+
 @app.route('/metrics/<int:metric_id>')
 @login_required
 def get_metric(metric_id):
@@ -118,8 +125,8 @@ def get_metric(metric_id):
 @login_required
 def get_toggles():
     if request.method == 'POST':
-        toggle = Toggle.query.get(int(request.form['submit'].split('-',1)[0]))
-        toggle.value = request.form['submit'].split('-',1)[1]
+        toggle = Toggle.query.get(int(request.form['submit'].split('-', 1)[0]))
+        toggle.value = request.form['submit'].split('-', 1)[1]
         return render_template(
             'toggles.html',
             toggles=Toggle.query.all())
@@ -208,6 +215,7 @@ def new_metric():
     else:
         return render_template("new-metric.html", form=form)
 
+
 @app.route('/new-toggle', methods=["GET", "POST"])
 @login_required
 def new_toggle():
@@ -216,7 +224,7 @@ def new_toggle():
         if form.validate_on_submit():
             toggle = Toggle(title=form.title.data, refkey=form.refkey.data,
                             on_str=form.on_str.data, off_str=form.off_str.data,
-                          thing=form.thing.data)
+                            thing=form.thing.data)
             try:
                 db.session.add(toggle)
                 db.session.commit()
@@ -245,6 +253,7 @@ def _jinja2_filter_datetime(date, fmt=None):
 @app.template_filter('ts')
 def _jinja2_filter_timestamp(timestamp, fmt=None):
     if fmt:
-        return datetime.datetime.fromtimestamp(timestamp,pytz.timezone("America/New_York")).strftime(fmt)
+        return datetime.datetime.fromtimestamp(timestamp, pytz.timezone("America/New_York")).strftime(fmt)
     else:
-        return datetime.datetime.fromtimestamp(timestamp,pytz.timezone("America/New_York")).strftime('%Y/%m/%d %-I:%M %p %Z')
+        return datetime.datetime.fromtimestamp(timestamp, pytz.timezone("America/New_York")).strftime(
+            '%Y/%m/%d %-I:%M %p %Z')
