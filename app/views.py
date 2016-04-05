@@ -8,6 +8,7 @@ from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, Togg
 import sqlalchemy
 import datetime
 import pytz
+import boto3
 
 
 @login_manager.user_loader
@@ -109,18 +110,33 @@ def get_metrics():
 @app.route("/snapshots", methods=["GET", "POST"])
 @login_required
 def get_snapshots():
-
+    s3 = boto3.client('s3')
+    data = []
+    for key in s3.list_objects(Bucket=app.config['S3_BUCKET'], Prefix='snapshots')['Contents']:
+        if not key['Key'].endswith("/"):
+            url = s3.generate_presigned_url(
+                ClientMethod='get_object',
+                Params={
+                    'Bucket': app.config['S3_BUCKET'],
+                    'Key': key['Key']
+                }
+            )
+            local_tz = pytz.timezone('America/New_York')
+            local_dt = key['LastModified'].replace(tzinfo=pytz.utc).astimezone(local_tz)
+            ts = local_tz.normalize(local_dt)
+            name = str(key['Key'].split('/')[-1])
+            data.append({'name': name.rsplit('.', 1)[0], 'timestamp': ts, 'url': url})
     if request.method == 'POST':
         if 'submit' in request.form:
-            snapshot = Snapshot.query.filter_by(thing_id=int(request.form['submit'])).first()
+            snapshot = Snapshot.query.join(Thing).filter(Thing.name == request.form['submit']).first()
             snapshot.value = datetime.datetime.now().strftime("%s")
         return render_template(
             'snapshots.html',
-            snapshots=Snapshot.query.join(Thing, Snapshot.thing_id == Thing.id).order_by("things.name").all())
+            snapshots=data)
     else:
         return render_template(
             'snapshots.html',
-            snapshots=Snapshot.query.join(Thing, Snapshot.thing_id == Thing.id).order_by("things.name").all())
+            snapshots=data)
 
 
 @app.route('/metrics/<int:metric_id>')
