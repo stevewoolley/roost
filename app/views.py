@@ -106,12 +106,20 @@ def get_metrics():
         metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all())
 
 
-@app.route("/snapshots", methods=["GET"])
+@app.route("/snapshots", methods=["GET", "POST"])
 @login_required
 def get_snapshots():
-    return render_template(
-        'snapshots.html',
-        snapshots=Snapshot.query.join(Thing, Snapshot.thing_id == Thing.id).order_by("things.name").all())
+
+    if request.method == 'POST':
+        snapshot = Snapshot.query.filter_by(thing_id=int(request.form['submit'])).first()
+        snapshot.value = datetime.datetime.now().strftime("%s")
+        return render_template(
+            'snapshots.html',
+            snapshots=Snapshot.query.join(Thing, Snapshot.thing_id == Thing.id).order_by("things.name").all())
+    else:
+        return render_template(
+            'snapshots.html',
+            snapshots=Snapshot.query.join(Thing, Snapshot.thing_id == Thing.id).order_by("things.name").all())
 
 
 @app.route('/metrics/<int:metric_id>')
@@ -130,7 +138,7 @@ def get_toggles():
         toggle.value = request.form['submit'].split('-', 1)[1]
         return render_template(
             'toggles.html',
-            toggles=Toggle.query.all())
+            toggles=Toggle.query.order_by("title").all())
     else:
         return render_template(
             'toggles.html',

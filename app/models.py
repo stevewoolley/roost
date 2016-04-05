@@ -63,7 +63,7 @@ class Thing(db.Model):
 
 
 def __repr__(self):
-        return '<id {}>'.format(self.id)
+    return '<id {}>'.format(self.id)
 
 
 class Metric(db.Model):
@@ -148,6 +148,30 @@ class Snapshot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
     thing = db.relationship('Thing', back_populates=('snapshot'))
+
+    @property
+    def response(self):
+        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
+                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
+        headers = {'Content-Type': 'application/json'}
+        if not hasattr(self, 'resp'):
+            self.resp = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+        return self.resp
+
+    @property
+    def value(self):
+        return self.response.json()['state']['reported'][self.refkey]
+
+    @value.setter
+    def value(self, v):
+        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
+                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
+        headers = {'Content-Type': 'application/json'}
+        data = {}
+        data["state"] = {}
+        data["state"]["desired"] = {}
+        data["state"]["desired"]['snapshot'] = v
+        requests.post(self.thing.endpoint, data=json.dumps(data), cert=cert, verify=True, headers=headers)
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
