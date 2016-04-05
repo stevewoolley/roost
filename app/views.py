@@ -111,8 +111,9 @@ def get_metrics():
 def get_snapshots():
 
     if request.method == 'POST':
-        snapshot = Snapshot.query.filter_by(thing_id=int(request.form['submit'])).first()
-        snapshot.value = datetime.datetime.now().strftime("%s")
+        if 'submit' in request.form:
+            snapshot = Snapshot.query.filter_by(thing_id=int(request.form['submit'])).first()
+            snapshot.value = datetime.datetime.now().strftime("%s")
         return render_template(
             'snapshots.html',
             snapshots=Snapshot.query.join(Thing, Snapshot.thing_id == Thing.id).order_by("things.name").all())

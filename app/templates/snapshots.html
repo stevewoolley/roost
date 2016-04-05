@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 {% include 'flash.html' %}
-<div class="page-header"><h2>Snapshots</h2></div>
+<form method="POST">
+<div class="page-header"><h2>Snapshots <button type="submit" name="foo" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-refresh" aria-hidden="true"></span></small></button></h2></div>
 
 <p>
-<form method="POST">
     <div class="row">
         {%- for snapshot in snapshots %}
         <div class="col-md-6">
@@ -12,7 +12,7 @@
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-md-6">{{ snapshot.thing.name }}</div>
-                        <div class="col-md-6 text-right"><button value="{{ snapshot.thing_id }}" type="submit" name="submit" class="btn btn-default btn-xs">Refresh</button></div>
+                        <div class="col-md-6 text-right"><button value="{{ snapshot.thing_id }}" type="submit" name="submit" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-camera" aria-hidden="true"></span></button></div>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -23,6 +23,7 @@
         </div>
         {%- endfor %}
     </div>
-</form>
 </p>
+</form>
+
 {% endblock %}
