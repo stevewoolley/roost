@@ -89,9 +89,6 @@ class Metric(db.Model):
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
-    def __init__(self, resp):
-        self.resp = resp
-
 
 class Toggle(db.Model):
     __tablename__ = 'toggles'
@@ -115,7 +112,10 @@ class Toggle(db.Model):
 
     @property
     def value(self):
-        return self.response.json()['state']['reported'][self.refkey]
+        if self.refkey in self.response.json()['state']['reported']:
+            return self.response.json()['state']['reported'][self.refkey]
+        else:
+          return None
 
     @value.setter
     def value(self, v):
@@ -137,9 +137,6 @@ class Toggle(db.Model):
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
-
-    def __init__(self, resp):
-        self.resp = resp
 
 
 class Snapshot(db.Model):
