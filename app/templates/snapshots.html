@@ -19,9 +19,11 @@
                     <div class="row">
                         <div class="col-md-6">{{ snapshot.name }}</div>
                         <div class="col-md-6 text-right">
+                        {% if snapshot.url %}
                             <button value="{{ snapshot.name }}" type="submit" name="submit"
                                     class="btn btn-default btn-xs"><span class="glyphicon glyphicon-camera"
                                                                          aria-hidden="true"></span></button>
+                        {% endif %}
                         </div>
                     </div>
                 </div>
