@@ -129,7 +129,7 @@ def get_snapshots():
                     }
                 )
             except:
-                #  image not part of snapshots
+                #  image is not part of snapshots
                 url = None
             data.append({'name': name.rsplit('.', 1)[0], 'timestamp': ts, 'url': url})
     if request.method == 'POST':
