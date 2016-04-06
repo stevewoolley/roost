@@ -1,25 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
 {% include 'flash.html' %}
-<div class="panel panel-default">
-    <div class="panel-heading">{{ metric.thing.name }}</div>
 
-    <!-- Table -->
-    <table class="table">
-        <tbody>
-        {% for key, value in metric.items.json()['state']['reported'].iteritems() %}
-        <tr>
-            <td>{{ key }}</td>
-            <td>
-                <div data-toggle="tooltip" title
-                     data-original-title="{{ metric.items.json()['metadata']['reported'][key]['timestamp']|ts }}"
-                     data-placement="left">{{ value }}
-                </div>
-            </td>
-        </tr>
+<div class="row">
+    <div class="btn-group btn-group-xsm" role="group" aria-label="metrics">
+        {% for m in metrics %}
+            {% if m.id == metric.id %}
+                <a class="btn btn-default active" href="{{ url_for('get_metric', metric_id=m.id) }}" role="button">
+            {% else %}
+                <a class="btn btn-default" href="{{ url_for('get_metric', metric_id=m.id) }}" role="button">
+            {% endif %}
+            {{ m.thing.name }}
+        </a>
         {% endfor %}
-        </tbody>
-    </table>
+    </div>
 </div>
+<br/>
+<div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading">{{ metric.thing.name }}</div>
 
+        <!-- Table -->
+        <table class="table">
+            <tbody>
+            {% for key, value in metric.items.json()['state']['reported'].iteritems() %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>
+                    <div data-toggle="tooltip" title
+                         data-original-title="{{ metric.items.json()['metadata']['reported'][key]['timestamp']|ts }}"
+                         data-placement="left">{{ value }}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

@@ -144,6 +144,7 @@ def get_snapshots():
 def get_metric(metric_id):
     return render_template(
         'metric.html',
+        metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all(),
         metric=Metric.query.get(metric_id))
 
 
@@ -216,6 +217,7 @@ def new_thing():
             form=form)
     else:
         return render_template("new-thing.html", form=form)
+
 
 @app.route('/new-snapshot', methods=["GET", "POST"])
 @login_required
