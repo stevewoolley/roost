@@ -7,8 +7,15 @@ from .models import User, Certificate, Thing, Metric, Toggle, Snapshot
 from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm, SnapshotForm
 import sqlalchemy
 import datetime
+from datetime import time
+from pytz import timezone
 import pytz
 import boto3
+from boto3.dynamodb.conditions import Key
+import pygal
+
+DT_FORMAT = '%Y/%m/%d %-I:%M %p %Z'
+TZ = timezone("America/New_York")
 
 
 @login_manager.user_loader
@@ -299,12 +306,38 @@ def new_toggle():
         return render_template("new-toggle.html", form=form)
 
 
+@app.route('/testgraph')
+@login_required
+def testgraph():
+    try:
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('sensors')
+        response = table.query(
+            KeyConditionExpression=Key('source').eq('pi2'),
+            ScanIndexForward=False,
+            Limit=1500
+        )
+        graph = pygal.DateTimeLine(show_dots=False, x_label_rotation=35, truncate_label=-1,
+                                   x_value_formatter=lambda dt: TZ.localize(dt).strftime(DT_FORMAT))
+        graph.title = 'Temperature'
+        x = []
+        for i in response['Items']:
+            if 'temperature' in i['payload']['state']['reported']:
+                x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0),
+                          i['payload']['state']['reported']['temperature']))
+        graph.add("Temperature", x)
+        graph_data = graph.render_data_uri()
+        return render_template('graphing.html', graph_data=graph_data)
+    except Exception, e:
+        return (str(e))
+
+
 @app.template_filter('dt')
 def _jinja2_filter_datetime(date, fmt=None):
     if fmt:
         return date.strftime(fmt)
     else:
-        return date.strftime('%Y/%m/%d %-I:%M %p %Z')
+        return date.strftime(DT_FORMAT)
 
 
 @app.template_filter('ts')
@@ -313,4 +346,4 @@ def _jinja2_filter_timestamp(timestamp, fmt=None):
         return datetime.datetime.fromtimestamp(timestamp, pytz.timezone("America/New_York")).strftime(fmt)
     else:
         return datetime.datetime.fromtimestamp(timestamp, pytz.timezone("America/New_York")).strftime(
-            '%Y/%m/%d %-I:%M %p %Z')
+            DT_FORMAT)
