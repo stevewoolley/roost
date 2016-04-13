@@ -307,8 +307,7 @@ def new_toggle():
 @login_required
 def graph_it(thing, metric):
     try:
-        #dynamodb = boto3.resource('dynamodb', region_name=app.config['CERTIFICATES_FOLDER'], endpoint_url=)
-        dynamodb = boto3.resource('dynamodb')
+        dynamodb = boto3.resource('dynamodb', region_name=app.config['AWS_REGION'])
         table = dynamodb.Table('sensors')
         response = table.query(
             KeyConditionExpression=Key('source').eq(thing),
