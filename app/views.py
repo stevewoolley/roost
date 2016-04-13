@@ -8,15 +8,13 @@ from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, Togg
 import sqlalchemy
 import datetime
 from datetime import time
-from pytz import timezone
 import pytz
 import boto3
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 import pygal
 
 DT_FORMAT = '%Y/%m/%d %-I:%M %p %Z'
-TZ = timezone("America/New_York")
-
+TZ = pytz.timezone("America/New_York")
 
 @login_manager.user_loader
 def load_user(email):
@@ -121,10 +119,9 @@ def get_snapshots():
     data = []
     for key in s3.list_objects(Bucket=app.config['S3_BUCKET'], Prefix='snapshots')['Contents']:
         if not key['Key'].endswith("/"):
-            local_tz = pytz.timezone('America/New_York')
-            local_dt = key['LastModified'].replace(tzinfo=pytz.utc).astimezone(local_tz)
+            local_dt = key['LastModified'].replace(tzinfo=pytz.utc).astimezone(TZ)
             name = str(key['Key'].split('/')[-1])
-            ts = local_tz.normalize(local_dt)
+            ts = TZ.normalize(local_dt)
             query = Snapshot.query.join(Thing).filter(Thing.name == name.rsplit('.', 1)[0])
             try:
                 query.one()
@@ -306,26 +303,26 @@ def new_toggle():
         return render_template("new-toggle.html", form=form)
 
 
-@app.route('/testgraph')
+@app.route('/graph/<string:thing>/<string:metric>')
 @login_required
-def testgraph():
+def graph_it(thing, metric):
     try:
         dynamodb = boto3.resource('dynamodb')
         table = dynamodb.Table('sensors')
         response = table.query(
-            KeyConditionExpression=Key('source').eq('pi2'),
+            KeyConditionExpression=Key('source').eq(thing),
             ScanIndexForward=False,
-            Limit=1500
+            FilterExpression=Attr('payload.state.reported.' + metric).exists(),
+            Limit=2016
         )
-        graph = pygal.DateTimeLine(show_dots=False, x_label_rotation=35, truncate_label=-1,
-                                   x_value_formatter=lambda dt: TZ.localize(dt).strftime(DT_FORMAT))
-        graph.title = 'Temperature'
+        graph = pygal.DateTimeLine(show_legend=False, show_dots=False, x_label_rotation=35, truncate_label=-1,
+                                   x_value_formatter=lambda dt: dt.strftime(DT_FORMAT))
+        graph.title = metric
         x = []
         for i in response['Items']:
-            if 'temperature' in i['payload']['state']['reported']:
-                x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0),
-                          i['payload']['state']['reported']['temperature']))
-        graph.add("Temperature", x)
+            x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0),
+                      i['payload']['state']['reported'][metric]))
+        graph.add(metric, x)
         graph_data = graph.render_data_uri()
         return render_template('graphing.html', graph_data=graph_data)
     except Exception, e:
@@ -343,7 +340,6 @@ def _jinja2_filter_datetime(date, fmt=None):
 @app.template_filter('ts')
 def _jinja2_filter_timestamp(timestamp, fmt=None):
     if fmt:
-        return datetime.datetime.fromtimestamp(timestamp, pytz.timezone("America/New_York")).strftime(fmt)
+        return datetime.datetime.fromtimestamp(timestamp, TZ).strftime(fmt)
     else:
-        return datetime.datetime.fromtimestamp(timestamp, pytz.timezone("America/New_York")).strftime(
-            DT_FORMAT)
+        return datetime.datetime.fromtimestamp(timestamp, TZ).strftime(DT_FORMAT)
