@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block footer %}
-Metrics
+Metrics <a class="btn btn-primary btn-sm" href="{{ url_for('new_metric') }}">New</a>
 {% endblock %}
 
 {% block content %}
 {% include 'flash.html' %}
-<a class="btn btn-primary btn-sm" href="{{ url_for('new_metric') }}">New</a>
+
 <p>
 <div class="list-group">
     {%- for metric in metrics %}
