@@ -17,7 +17,7 @@
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <div class="row">
-                        <div class="col-md-6">{{ snapshot.name }}</div>
+                        <div class="col-md-6"><a href="{{ url_for('get_snapshots', filename=snapshot.name) }}" class="btn btn-default btn-xs">{{ snapshot.name }}</a></div>
                         <div class="col-md-6 text-right">
                         {% if snapshot.url %}
                             <button value="{{ snapshot.name }}" type="submit" name="submit"

@@ -112,41 +112,48 @@ def get_metrics():
         metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all())
 
 
-@app.route("/snapshots", methods=["GET", "POST"])
+@app.route("/snapshots", defaults={'filename': None}, methods=["GET", "POST"])
+@app.route("/snapshots/<filename>", methods=["GET", "POST"])
 @login_required
-def get_snapshots():
+def get_snapshots(filename):
     s3 = boto3.client('s3')
+    prefix = 'snapshots'
+    if filename:
+        prefix = os.path.join(prefix, filename)
     data = []
-    for key in s3.list_objects(Bucket=app.config['S3_BUCKET'], Prefix='snapshots')['Contents']:
-        if not key['Key'].endswith("/"):
-            local_dt = key['LastModified'].replace(tzinfo=pytz.utc).astimezone(TZ)
-            name = str(key['Key'].split('/')[-1])
-            ts = TZ.normalize(local_dt)
-            query = Snapshot.query.join(Thing).filter(Thing.name == name.rsplit('.', 1)[0])
-            try:
-                query.one()
-                url = s3.generate_presigned_url(
-                    ClientMethod='get_object',
-                    Params={
-                        'Bucket': app.config['S3_BUCKET'],
-                        'Key': key['Key']
-                    }
-                )
-            except:
-                #  image is not part of snapshots
-                url = None
-            data.append({'name': name.rsplit('.', 1)[0], 'timestamp': ts, 'url': url})
-    if request.method == 'POST':
-        if 'submit' in request.form:
-            snapshot = Snapshot.query.join(Thing).filter(Thing.name == request.form['submit']).first()
-            snapshot.value = datetime.datetime.now().strftime("%s")
-        return render_template(
-            'snapshots.html',
-            snapshots=data)
-    else:
-        return render_template(
-            'snapshots.html',
-            snapshots=data)
+    try:
+        for key in s3.list_objects(Bucket=app.config['S3_BUCKET'], Prefix=prefix)['Contents']:
+            if not key['Key'].endswith("/"):
+                local_dt = key['LastModified'].replace(tzinfo=pytz.utc).astimezone(TZ)
+                name = str(key['Key'].split('/')[-1])
+                ts = TZ.normalize(local_dt)
+                query = Snapshot.query.join(Thing).filter(Thing.name == name.rsplit('.', 1)[0])
+                try:
+                    query.one()
+                    url = s3.generate_presigned_url(
+                        ClientMethod='get_object',
+                        Params={
+                            'Bucket': app.config['S3_BUCKET'],
+                            'Key': key['Key']
+                        }
+                    )
+                except:
+                    #  image is not part of snapshots
+                    url = None
+                data.append({'name': name.rsplit('.', 1)[0], 'timestamp': ts, 'url': url})
+        if request.method == 'POST':
+            if 'submit' in request.form:
+                snapshot = Snapshot.query.join(Thing).filter(Thing.name == request.form['submit']).first()
+                snapshot.value = datetime.datetime.now().strftime("%s")
+            return render_template(
+                'snapshots.html',
+                snapshots=data)
+        else:
+            return render_template(
+                'snapshots.html',
+                snapshots=data)
+    except Exception, e:
+        return not_found_error(str(e))
 
 
 @app.route('/metrics/<int:metric_id>')
@@ -156,6 +163,7 @@ def get_metric(metric_id):
         'metric.html',
         metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all(),
         metric=Metric.query.get(metric_id))
+
 
 
 @app.route("/toggles", methods=["GET", "POST"])
