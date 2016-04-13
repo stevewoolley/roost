@@ -84,6 +84,7 @@
 </div>
 <nav class="navbar navbar-inverse navbar-default navbar-fixed-bottom">
     <div class="container">
+        <p class="navbar-text">{% block footer %}{% endblock %}</p>
         <p class="navbar-text navbar-right">{{ current_user.email }}</p>
     </div>
 </nav>

@@ -1,13 +1,14 @@
 {% extends "base.html" %}
+{% block footer %}
+Toggles <a class="btn btn-primary btn-xs" href="{{ url_for('new_toggle') }}">New</a>
+{% endblock %}
+
 {% block content %}
 {% include 'flash.html' %}
-<div class="page-header"><h2>Toggles</h2></div>
-<a class="btn btn-primary btn-sm" href="{{ url_for('new_toggle') }}">New</a>
 
 <p>
 <form method="POST">
     <div class="row">
-
         {%- for toggle in toggles %}
         <div class="col-md-3">
             <div class="panel panel-primary">

@@ -1,16 +1,10 @@
 {% extends "base.html" %}
+{% block footer %}
+Snapshots
+{% endblock %}
 {% block content %}
 {% include 'flash.html' %}
 <form method="POST">
-    <div class="page-header">
-        <h2>Snapshots
-            <button type="submit" name="foo" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-refresh"
-                                                                                  aria-hidden="true"></span></small>
-            </button>
-        </h2>
-    </div>
-
-    <p>
     <div class="row">
         {%- for snapshot in snapshots %}
         <div class="col-md-6">
@@ -39,3 +33,4 @@
 </form>
 
 {% endblock %}
+
