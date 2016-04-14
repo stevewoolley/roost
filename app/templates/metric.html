@@ -25,7 +25,12 @@
             <tbody>
             {% for key, value in metric.items.json()['state']['reported'].iteritems() %}
             <tr>
-                <td>{{ key }}</td>
+                <td>
+                    {{ key }}
+                    {% if value is number %}
+                      <a href="{{ url_for('graph_it',thing=metric.thing.name,metric=key) }}"><i class="glyphicon glyphicon-stats"></i></a>
+                    {% endif %}
+                </td>
                 <td>
                     <div data-toggle="tooltip" title
                          data-original-title="{{ metric.items.json()['metadata']['reported'][key]['timestamp']|ts }}"
