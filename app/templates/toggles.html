@@ -9,19 +9,14 @@ Toggles <a class="btn btn-primary btn-xs" href="{{ url_for('new_toggle') }}">New
 <p>
 <form method="POST">
     <div class="row">
-        {%- for toggle in toggles %}
-        <div class="col-md-3">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h3 class="panel-title">{{ toggle.title }}</h3>
-                </div>
-                <div class="panel-body">
-                    <p align="center"><strong>{{ toggle.value }}</strong></p>
-                    <button type="submit" class="btn btn-info btn-block" name="submit" value="{{ toggle.id }}-{{ toggle.not_value }}">{{ toggle.not_value }}</button>
-                </div>
-            </div>
+        <div class="btn-group-vertical" role="group" aria-label="Toggles">
+            {%- for toggle in toggles %}
+            <button type="submit" class="btn btn-default btn-lg" name="submit" style="text-align:left; padding-left:6px"
+                    value="{{ toggle.id }}-{{ toggle.not_value }}">
+                    <i class="glyphicon glyphicon-stop"></i> {{ toggle.title }} {{ toggle.not_value }}
+            </button>
+            {%- endfor %}
         </div>
-        {%- endfor %}
     </div>
 </form>
 </p>
