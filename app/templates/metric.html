@@ -23,7 +23,7 @@
         <!-- Table -->
         <table class="table">
             <tbody>
-            {% for key, value in metric.items.json()['state']['reported'].iteritems() %}
+            {% for key, value in metric.items.json()['state']['reported'].iteritems()|sort %}
             <tr>
                 <td>
                     {{ key }}

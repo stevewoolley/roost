@@ -12,6 +12,7 @@ import pytz
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import pygal
+import collections
 
 DT_FORMAT = '%Y/%m/%d %-I:%M %p %Z'
 TZ = pytz.timezone("America/New_York")
@@ -332,7 +333,7 @@ def graph_it(thing, metric):
                       i['payload']['state']['reported'][metric]))
         graph.add(metric, x)
         graph_data = graph.render_data_uri()
-        return render_template('graphing.html', graph_data=graph_data)
+        return render_template('graphing.html', graph_data=graph_data, thing=thing)
     except Exception, e:
         return (str(e))
 
