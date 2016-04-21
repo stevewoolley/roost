@@ -333,7 +333,7 @@ def graph_it(thing, metric):
         graph.title = metric
         x = []
         for i in response['Items']:
-            x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0),
+            x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0).replace(tzinfo=pytz.utc).astimezone(TZ),
                       i['payload']['state']['reported'][metric]))
         graph.add(metric, x)
         graph_data = graph.render_data_uri()
