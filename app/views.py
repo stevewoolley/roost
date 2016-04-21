@@ -328,7 +328,7 @@ def graph_it(thing, metric):
             FilterExpression=Attr('payload.state.reported.' + metric).exists(),
             Limit=2016
         )
-        graph = pygal.DateTimeLine(show_legend=False, show_dots=False, x_label_rotation=35, truncate_label=-1,
+        graph = pygal.DateTimeLine(show_legend=False, x_label_rotation=35, truncate_label=-1,
                                    x_value_formatter=lambda dt: dt.strftime(DT_FORMAT))
         graph.title = metric
         x = []
