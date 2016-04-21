@@ -2,7 +2,6 @@ from flask_wtf import Form
 from wtforms import StringField, PasswordField, validators, FileField, FieldList, IntegerField
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from .models import Certificate, Thing
-from sqlalchemy.orm import load_only
 
 
 class LoginForm(Form):
