@@ -167,19 +167,23 @@ def get_metric(metric_id):
 
 
 
-@app.route("/toggles", methods=["GET", "POST"])
+@app.route("/toggles", defaults={'toggle_id': None}, methods=["GET", "POST"])
+@app.route("/toggles/<int:toggle_id>", methods=["GET", "POST"])
 @login_required
-def get_toggles():
-    if request.method == 'POST':
-        toggle = Toggle.query.get(int(request.form['submit'].split('-', 1)[0]))
-        toggle.value = request.form['submit'].split('-', 1)[1]
+def get_toggles(toggle_id):
+    try:
+        if request.method == 'POST':
+            toggle = Toggle.query.get(int(request.form['submit'].split('-', 1)[0]))
+            toggle.value = request.form['submit'].split('-', 1)[1]
+        if toggle_id:
+            toggles = [Toggle.query.filter(Toggle.id == toggle_id).one()]
+        else:
+            toggles = Toggle.query.order_by("title").all()
         return render_template(
             'toggles.html',
-            toggles=Toggle.query.order_by("title").all())
-    else:
-        return render_template(
-            'toggles.html',
-            toggles=Toggle.query.order_by("title").all())
+            toggles=toggles)
+    except Exception, e:
+        return not_found_error(str(e))
 
 
 @app.route('/new-certificate', methods=["GET", "POST"])
