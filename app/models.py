@@ -122,11 +122,8 @@ class Toggle(db.Model):
         cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
-        data = {}
-        data["state"] = {}
-        data["state"]["desired"] = {}
-        data["state"]["desired"][self.refkey] = v
-        requests.post(self.thing.endpoint, data=json.dumps(data), cert=cert, verify=True, headers=headers)
+        payload = json.dumps({'state': {'desired': {self.refkey: v}}})
+        requests.post(self.thing.endpoint, data=json.dumps(payload), cert=cert, verify=True, headers=headers)
 
     @property
     def not_value(self):
@@ -164,11 +161,8 @@ class Snapshot(db.Model):
         cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
-        data = {}
-        data["state"] = {}
-        data["state"]["desired"] = {}
-        data["state"]["desired"]['snapshot'] = v
-        requests.post(self.thing.endpoint, data=json.dumps(data), cert=cert, verify=True, headers=headers)
+        payload = json.dumps({'state': {'desired': {'snapshot': v}}})
+        requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
