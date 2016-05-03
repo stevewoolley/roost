@@ -132,7 +132,8 @@ class Toggle(db.Model):
         headers = {'Content-Type': 'application/json'}
         payload = json.dumps({'state': {'desired': {self.refkey: v}}})
         self.logger.info("Toggle(value.setter): %s %s %s %s" % (str(self.thing.endpoint), str(payload), str(cert), str(headers)))
-        requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
+        res = requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
+        self.logger.info("Toggle(value.setter) result: %s" % (str(res)))
 
     @property
     def not_value(self):
@@ -174,7 +175,8 @@ class Snapshot(db.Model):
         headers = {'Content-Type': 'application/json'}
         payload = json.dumps({'state': {'desired': {'snapshot': v}}})
         self.logger.info("Snapshot(value.setter): %s %s %s %s %s" % (str(self.thing.endpoint), str(payload), str(cert), str(headers)))
-        requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
+        res = requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
+        self.logger.info("Snapshot(value.setter) result: %s" % (str(res)))
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
