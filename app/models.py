@@ -4,7 +4,14 @@ import datetime
 import requests
 import os
 import json
+import logging
 
+def set_logger(name='iot', level=logging.INFO):
+    logging.basicConfig(level=level,
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        filename="/var/log/%s.log" % (name),
+                        filemode='a')
+    return logging.getLogger()
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -123,7 +130,8 @@ class Toggle(db.Model):
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
         payload = json.dumps({'state': {'desired': {self.refkey: v}}})
-        requests.post(self.thing.endpoint, data=json.dumps(payload), cert=cert, verify=True, headers=headers)
+        self.logger.info("Toggle(value.setter): %s %s %s %s" % (str(self.thing.endpoint), str(payload), str(cert), str(headers)))
+        requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
 
     @property
     def not_value(self):
@@ -138,6 +146,8 @@ class Toggle(db.Model):
 
 class Snapshot(db.Model):
     __tablename__ = 'snapshots'
+
+    self.logger = set_logger()
 
     id = db.Column(db.Integer, primary_key=True)
     thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
@@ -162,6 +172,7 @@ class Snapshot(db.Model):
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
         payload = json.dumps({'state': {'desired': {'snapshot': v}}})
+        self.logger.info("Snapshot(value.setter): %s %s %s %s %s" % (str(self.thing.endpoint), str(payload), str(cert), str(headers)))
         requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
 
     def __repr__(self):
