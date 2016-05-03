@@ -99,6 +99,7 @@ class Metric(db.Model):
 
 class Toggle(db.Model):
     __tablename__ = 'toggles'
+    logger = set_logger()
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), unique=True, nullable=False)
@@ -147,7 +148,7 @@ class Toggle(db.Model):
 class Snapshot(db.Model):
     __tablename__ = 'snapshots'
 
-    self.logger = set_logger()
+    logger = set_logger()
 
     id = db.Column(db.Integer, primary_key=True)
     thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
