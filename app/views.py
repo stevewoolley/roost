@@ -13,9 +13,18 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import pygal
 import collections
+import logging
 
 DT_FORMAT = '%Y/%m/%d %-I:%M %p %Z'
 TZ = pytz.timezone("America/New_York")
+
+def set_logger(name='iot', level=logging.INFO):
+    logging.basicConfig(level=level,
+                        format='%(asctime)s %(levelname)-8s %(message)s',
+                        filename="/var/log/%s.log" % (name),
+                        filemode='a')
+    return logging.getLogger()
+
 
 @login_manager.user_loader
 def load_user(email):
@@ -117,6 +126,7 @@ def get_metrics():
 @app.route("/snapshots/<filename>", methods=["GET", "POST"])
 @login_required
 def get_snapshots(filename):
+    logger = set_logger()
     s3 = boto3.client('s3')
     prefix = 'snapshots'
     if filename:
@@ -154,6 +164,7 @@ def get_snapshots(filename):
                 'snapshots.html',
                 snapshots=data)
     except Exception, e:
+        logger.info("get_snapshots: %s" % (str(e)))
         return not_found_error(str(e))
 
 
