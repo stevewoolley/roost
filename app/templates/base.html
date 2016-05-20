@@ -31,6 +31,8 @@
 
 
 
+
+
     </script>
 </head>
 <body>
@@ -45,47 +47,53 @@
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="{{ url_for('index') }}"><span class="glyphicon glyphicon-home"
-                                                                         aria-hidden="true"></span>  {{ config['SITE_NAME'] }}</a>
+                                                                        aria-hidden="true"></span> {{
+                config['SITE_NAME'] }}</a>
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse-1">
             <ul class="nav navbar-nav">
                 {% if current_user.is_authenticated %}
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">Buckets <span class="caret"></span></a>
+                       aria-expanded="false"><span class="glyphicon glyphicon-dashboard"
+                                                   aria-hidden="true"></span> Buckets <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('get_toggles') }}"><span class="glyphicon glyphicon-adjust"
                                                                          aria-hidden="true"></span> Toggles</a></li>
                         <li><a href="{{ url_for('get_metrics') }}"><span class="glyphicon glyphicon-stats"
                                                                          aria-hidden="true"></span> Metrics</a></li>
                         <li><a href="{{ url_for('get_snapshots') }}"><span class="glyphicon glyphicon-camera"
-                                                                         aria-hidden="true"></span> Snapshots</a></li>
+                                                                           aria-hidden="true"></span> Snapshots</a></li>
                     </ul>
                 </li>
                 {% if current_user.is_admin %}
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">Admin <span class="caret"></span></a>
+                       aria-expanded="false"><span class="glyphicon glyphicon-cog"
+                                                   aria-hidden="true"></span> Admin <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('get_users') }}"><span class="glyphicon glyphicon-user"
-                                                                         aria-hidden="true"></span> Users</a></li>
+                                                                       aria-hidden="true"></span> Users</a></li>
                         <li><a href="{{ url_for('get_certificates') }}"><span class="glyphicon glyphicon-certificate"
-                                                                         aria-hidden="true"></span> Certificates</a></li>
+                                                                              aria-hidden="true"></span>
+                            Certificates</a></li>
                         <li><a href="{{ url_for('get_things') }}"><span class="glyphicon glyphicon-cloud"
-                                                                         aria-hidden="true"></span> Things</a></li>
+                                                                        aria-hidden="true"></span> Things</a></li>
                         <li><a href="{{ url_for('new_snapshot') }}"><span class="glyphicon glyphicon-camera"
-                                                                         aria-hidden="true"></span> Snapshots</a></li>
+                                                                          aria-hidden="true"></span> Snapshots</a></li>
                     </ul>
                 </li>
                 {% endif %}
                 {% endif %}
             </ul>
             {% if current_user.is_authenticated %}
-            <p class="navbar-text navbar-right"><a href="/logout" class="navbar-link"><span class="glyphicon glyphicon-log-out"
-                                                                         aria-hidden="true"></span> Logout</a></p>
+            <p class="navbar-text navbar-right"><a href="/logout" class="navbar-link"><span
+                    class="glyphicon glyphicon-log-out"
+                    aria-hidden="true"></span> Logout</a></p>
             {% else %}
-            <p class="navbar-text navbar-right"><a href="/login" class="navbar-link"><span class="glyphicon glyphicon-log-in"
-                                                                         aria-hidden="true"></span> Login</a></p>
+            <p class="navbar-text navbar-right"><a href="/login" class="navbar-link"><span
+                    class="glyphicon glyphicon-log-in"
+                    aria-hidden="true"></span> Login</a></p>
             {% endif %}
         </div>
     </div>
