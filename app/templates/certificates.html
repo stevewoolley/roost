@@ -3,8 +3,9 @@
 Certificates
 {% endblock %}
 {% block content %}
+<div class="page-header"><h2>Certificates</h2></div>
 {% include 'flash.html' %}
-<a class="btn btn-primary btn-sm" href="{{ url_for('new_certificate') }}">New</a>
+<a class="btn btn-primary btn-sm" href="{{ url_for('new_certificate') }}"><i class="glyphicon glyphicon-plus"></i> New</a>
 <table class="table">
     <thead>
     <tr>

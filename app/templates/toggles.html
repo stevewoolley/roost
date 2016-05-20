@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block footer %}
-Toggles <a class="btn btn-primary btn-xs" href="{{ url_for('new_toggle') }}">New</a>
+Toggles <a class="btn btn-primary btn-xs" href="{{ url_for('new_toggle') }}"><i class="glyphicon glyphicon-plus"></i> New</a>
 {% endblock %}
 
 {% block content %}
@@ -13,7 +13,7 @@ Toggles <a class="btn btn-primary btn-xs" href="{{ url_for('new_toggle') }}">New
             {%- for toggle in toggles %}
             <button type="submit" class="btn btn-default btn-lg" name="submit" style="text-align:left; padding-left:6px"
                     value="{{ toggle.id }}-{{ toggle.not_value }}">
-                    <i class="glyphicon glyphicon-stop"></i> {{ toggle.title }} {{ toggle.not_value }}
+                    <i class="glyphicon glyphicon-adjust"></i> {{ toggle.title }} {{ toggle.not_value }}
             </button>
             {%- endfor %}
         </div>
