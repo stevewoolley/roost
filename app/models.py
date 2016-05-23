@@ -123,10 +123,6 @@ class Toggle(db.Model):
         cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
                 os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
         headers = {'Content-Type': 'application/json'}
-        if v == 'True':
-            v = True
-        elif v == 'False':
-            v = False
         payload = json.dumps({'state': {'desired': {self.refkey: v}}})
         res = requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
 
