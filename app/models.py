@@ -134,10 +134,6 @@ class Toggle(db.Model):
     def not_value(self):
         if self.value == self.on_str:
             return self.off_str
-        elif self.on_str == 'True':
-            return 'False'
-        elif self.on_str == 'False':
-            return 'True'
         else:
             return self.on_str
 
