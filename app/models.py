@@ -4,7 +4,15 @@ import datetime
 import requests
 import os
 import json
-import logging
+
+CERT = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'cert.pem'),
+        os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'key.pem'))
+HEADERS = {'Content-Type': 'application/json'}
+
+
+def iot_set(endpoint, key, value):
+    payload = json.dumps({'state': {'desired': {key: value}}})
+    return requests.post(endpoint, data=payload, cert=CERT, verify=True, headers=HEADERS)
 
 
 class User(db.Model):
@@ -62,9 +70,8 @@ class Thing(db.Model):
     metric = db.relationship('Metric', uselist=False, back_populates='thing')
     snapshot = db.relationship('Snapshot', uselist=False, back_populates='thing')
 
-
-def __repr__(self):
-    return '<id {}>'.format(self.id)
+    def __repr__(self):
+        return '<id {}>'.format(self.id)
 
 
 class Metric(db.Model):
@@ -76,11 +83,8 @@ class Metric(db.Model):
 
     @property
     def response(self):
-        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
-                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
-        headers = {'Content-Type': 'application/json'}
         if not hasattr(self, 'resp'):
-            self.resp = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+            self.resp = requests.get(self.thing.endpoint, cert=CERT, verify=True, headers=HEADERS)
         return self.resp
 
     @property
@@ -104,11 +108,8 @@ class Toggle(db.Model):
 
     @property
     def response(self):
-        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
-                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
-        headers = {'Content-Type': 'application/json'}
         if not hasattr(self, 'resp'):
-            self.resp = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+            self.resp = requests.get(self.thing.endpoint, cert=CERT, verify=True, headers=HEADERS)
         return self.resp
 
     @property
@@ -120,11 +121,7 @@ class Toggle(db.Model):
 
     @value.setter
     def value(self, v):
-        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
-                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
-        headers = {'Content-Type': 'application/json'}
-        payload = json.dumps({'state': {'desired': {self.refkey: v}}})
-        res = requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
+        iot_set(self.thing.endpoint, self.refkey, v)
 
     @property
     def not_value(self):
@@ -139,6 +136,7 @@ class Toggle(db.Model):
 
 class Snapshot(db.Model):
     __tablename__ = 'snapshots'
+    __subject__ = 'snapshot'
 
     id = db.Column(db.Integer, primary_key=True)
     thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
@@ -146,24 +144,17 @@ class Snapshot(db.Model):
 
     @property
     def response(self):
-        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
-                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
-        headers = {'Content-Type': 'application/json'}
         if not hasattr(self, 'resp'):
-            self.resp = requests.get(self.thing.endpoint, cert=cert, verify=True, headers=headers)
+            self.resp = requests.get(self.thing.endpoint, cert=CERT, verify=True, headers=HEADERS)
         return self.resp
 
     @property
     def value(self):
-        return self.response.json()['state']['reported'][self.refkey]
+        return self.response.json()['state']['reported'][self.__subject__]
 
     @value.setter
     def value(self, v):
-        cert = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-cert.pem'),
-                os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], str(self.thing.certificate.id) + '-key.pem'))
-        headers = {'Content-Type': 'application/json'}
-        payload = json.dumps({'state': {'desired': {'snapshot': v}}})
-        res = requests.post(self.thing.endpoint, data=payload, cert=cert, verify=True, headers=headers)
+        iot_set(self.thing.endpoint, self.__subject__, v)
 
     def __repr__(self):
         return '<id {}>'.format(self.id)

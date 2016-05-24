@@ -16,6 +16,7 @@ import collections
 DT_FORMAT = '%Y/%m/%d %-I:%M %p %Z'
 TZ = pytz.timezone("America/New_York")
 
+
 @login_manager.user_loader
 def load_user(email):
     return User.query.filter(User.email == email).first()
@@ -163,7 +164,6 @@ def get_metric(metric_id):
         'metric.html',
         metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all(),
         metric=Metric.query.get(metric_id))
-
 
 
 @app.route("/toggles", defaults={'toggle_id': None}, methods=["GET", "POST"])
@@ -332,7 +332,8 @@ def graph_it(thing, metric):
         graph.title = metric
         x = []
         for i in response['Items']:
-            x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0).replace(tzinfo=pytz.utc).astimezone(TZ),
+            x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0).replace(
+                tzinfo=pytz.utc).astimezone(TZ),
                       i['payload']['state']['reported'][metric]))
         graph.add(metric, x)
         graph_data = graph.render_data_uri()
