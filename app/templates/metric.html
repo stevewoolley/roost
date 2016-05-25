@@ -6,9 +6,9 @@
     <div class="btn-group btn-group-xsm" role="group" aria-label="metrics">
         {% for m in metrics %}
             {% if m.id == metric.id %}
-                <a class="btn btn-default active" href="{{ url_for('get_metric', metric_id=m.id) }}" role="button">
+                <a class="btn btn-default active" href="{{ url_for('get_metrics', metric_id=m.id) }}" role="button">
             {% else %}
-                <a class="btn btn-default" href="{{ url_for('get_metric', metric_id=m.id) }}" role="button">
+                <a class="btn btn-default" href="{{ url_for('get_metrics', metric_id=m.id) }}" role="button">
             {% endif %}
             {{ m.thing.name }}
         </a>

@@ -11,7 +11,6 @@ import pytz
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import pygal
-import collections
 
 DT_FORMAT = '%Y/%m/%d %-I:%M %p %Z'
 TZ = pytz.timezone("America/New_York")
@@ -105,12 +104,18 @@ def get_things():
         things=Thing.query.order_by("name").all())
 
 
-@app.route("/metrics", methods=["GET"])
+@app.route("/metrics", defaults={'metric_id': None}, methods=["GET"])
+@app.route('/metrics/<int:metric_id>')
 @login_required
-def get_metrics():
+def get_metrics(metric_id):
+    if metric_id is None:
+        metric = Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").first()
+    else:
+        metric = Metric.query.get(metric_id)
     return render_template(
-        'metrics.html',
-        metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all())
+        'metric.html',
+        metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all(),
+        metric=metric)
 
 
 @app.route("/snapshots", defaults={'filename': None}, methods=["GET", "POST"])
@@ -155,15 +160,6 @@ def get_snapshots(filename):
                 snapshots=data)
     except Exception, e:
         return not_found_error(str(e))
-
-
-@app.route('/metrics/<int:metric_id>')
-@login_required
-def get_metric(metric_id):
-    return render_template(
-        'metric.html',
-        metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all(),
-        metric=Metric.query.get(metric_id))
 
 
 @app.route("/toggles", defaults={'toggle_id': None}, methods=["GET", "POST"])
