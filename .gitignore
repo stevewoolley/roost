@@ -18,3 +18,7 @@ config.py
 app.db
 
 
+ansible/host_vars/
+ansible.cfg
+hosts
+/ansible/roles/*/vars/main.yml
