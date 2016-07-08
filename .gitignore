@@ -17,8 +17,10 @@ __pycache__/
 config.py
 app.db
 
-
-ansible/host_vars/
+# ansible
 ansible.cfg
 hosts
+*.retry
 /ansible/roles/*/vars/main.yml
+host_vars/
+group_vars/
