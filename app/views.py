@@ -1,7 +1,7 @@
 import os
 from flask import request, render_template, flash, redirect, url_for
-from flask.ext.login import login_user, logout_user, current_user, login_required
-from flask.ext.bcrypt import Bcrypt
+from flask_login import login_user, logout_user, current_user, login_required
+from flask_bcrypt import Bcrypt
 from app import app, db, login_manager
 from .models import User, Certificate, Thing, Metric, Toggle, Snapshot
 from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm, SnapshotForm
@@ -123,30 +123,29 @@ def get_metrics(metric_id):
 @login_required
 def get_snapshots(filename):
     s3 = boto3.client('s3')
+    extList = ['.jpg', '.png', '.gif']
     prefix = 'snapshots'
     if filename:
         prefix = os.path.join(prefix, filename)
     data = []
     try:
-        for key in s3.list_objects(Bucket=app.config['S3_BUCKET'], Prefix=prefix)['Contents']:
-            if not key['Key'].endswith("/"):
-                local_dt = key['LastModified'].replace(tzinfo=pytz.utc).astimezone(TZ)
-                name = str(key['Key'].split('/')[-1])
-                ts = TZ.normalize(local_dt)
-                query = Snapshot.query.join(Thing).filter(Thing.name == name.rsplit('.', 1)[0])
+        for key in s3.list_objects(Bucket=app.config['SNAPSHOT_BUCKET'])['Contents']:
+            if os.path.splitext(os.path.basename(key['Key']))[1] in extList:
+                # local_dt = key['LastModified'].replace(tzinfo=pytz.utc).astimezone(TZ)
+                name = os.path.basename(key['Key'])
+                #ts = TZ.normalize(local_dt)
                 try:
-                    query.one()
                     url = s3.generate_presigned_url(
                         ClientMethod='get_object',
                         Params={
-                            'Bucket': app.config['S3_BUCKET'],
+                            'Bucket': app.config['SNAPSHOT_BUCKET'],
                             'Key': key['Key']
                         }
                     )
                 except:
                     #  image is not part of snapshots
                     url = None
-                data.append({'name': name.rsplit('.', 1)[0], 'timestamp': ts, 'url': url})
+                data.append({'name': name.rsplit('.', 1)[0], 'url': url})
         if request.method == 'POST':
             if 'submit' in request.form:
                 snapshot = Snapshot.query.join(Thing).filter(Thing.name == request.form['submit']).first()

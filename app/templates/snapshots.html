@@ -13,16 +13,8 @@ Snapshots
                     <div class="row">
                         <div class="col-md-6"><a href="{{ url_for('get_snapshots', filename=snapshot.name) }}" class="btn btn-default btn-xs">{{ snapshot.name }}</a></div>
                         <div class="col-md-6 text-right">
-                        {% if snapshot.url %}
-                            <button value="{{ snapshot.name }}" type="submit" name="submit"
-                                    class="btn btn-default btn-xs"><span class="glyphicon glyphicon-camera"
-                                                                         aria-hidden="true"></span></button>
-                        {% endif %}
                         </div>
                     </div>
-                </div>
-                <div class="panel-body">
-                    {{ snapshot.timestamp|dt }}
                 </div>
                 <div class="span1"><img class="img-responsive center-block" src="{{ snapshot.url }}"/></div>
             </div>

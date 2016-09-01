@@ -12,6 +12,7 @@
   action: file dest={{ webapps_dir }}/{{ app_name }}/log state=directory
 
 - name: 'Deploy code from repository'
+  become: yes
   action: git repo={{ repo_url }} dest={{ webapps_dir }}/{{ app_name }}/src remote={{ repo_remote }} version={{ repo_version }}
   notify:
     - restart uwsgi app
@@ -20,7 +21,9 @@
   action: pip requirements={{ webapps_dir }}/{{ app_name }}/src/requirements.txt virtualenv={{ webapps_dir }}/{{ app_name }}/venv state=present
 
 - name: 'Modify flask uwsgi configuration'
+  become: yes
   template: src=config.py.j2 dest={{ webapps_dir }}/{{ app_name }}/src/config.py.example
 
 - name: 'Modify supervisor configuration'
+  become: yes
   template: src=uwsgi.conf.j2 dest=/etc/supervisor/conf.d/uwsgi.conf

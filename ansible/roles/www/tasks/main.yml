@@ -6,9 +6,11 @@
   include: hostname.yml
 
 - name: 'Update ubuntu package cache'
+  become: yes
   action: apt update_cache=yes
 
 - name: 'Upgrade to the lastest packages'
+  become: yes
   action: apt upgrade=safe
 
 - name: 'Install prerequisites'
