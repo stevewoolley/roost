@@ -20,7 +20,8 @@ class Publisher:
                          port=self.port,
                          tls={'ca_certs': self.root_ca,
                               'certfile': self.cert,
-                              'keyfile': self.key
+                              'keyfile': self.key,
+                              'tls_version': ssl.PROTOCOL_TLSv1
                               }
                          ,
                          protocol=MQTTv311)
@@ -31,7 +32,8 @@ class Publisher:
                          port=self.port,
                          tls={'ca_certs': self.root_ca,
                               'certfile': self.cert,
-                              'keyfile': self.key
+                              'keyfile': self.key,
+                              'tls_version': ssl.PROTOCOL_TLSv1
                               }
                          ,
                          protocol=MQTTv311)
