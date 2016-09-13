@@ -28,7 +28,7 @@ def unauthorized(error):
 
 @app.errorhandler(404)
 def not_found_error(error):
-    return render_template('404.html'), 404
+    return render_template('404.html', error=str(error)), 404
 
 
 @app.errorhandler(500)
