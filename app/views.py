@@ -3,8 +3,8 @@ from flask import request, render_template, flash, redirect, url_for
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_bcrypt import Bcrypt
 from app import app, db, login_manager
-from .models import User, Certificate, Thing, Metric, Toggle, Snapshot
-from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm, SnapshotForm
+from .models import User, Certificate, Thing, Metric, Toggle
+from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm
 import sqlalchemy
 import datetime, time
 import pytz
@@ -118,22 +118,16 @@ def get_metrics(metric_id):
         metric=metric)
 
 
-@app.route("/snapshots", defaults={'filename': None}, methods=["GET", "POST"])
-@app.route("/snapshots/<filename>", methods=["GET", "POST"])
+@app.route("/snapshots", methods=["GET"])
 @login_required
-def get_snapshots(filename):
+def get_snapshots():
     s3 = boto3.client('s3')
-    extList = ['.jpg', '.png', '.gif']
-    prefix = 'snapshots'
-    if filename:
-        prefix = os.path.join(prefix, filename)
+    ext_list = ['.jpg', '.png', '.gif']
     data = []
     try:
         for key in s3.list_objects(Bucket=app.config['SNAPSHOT_BUCKET'])['Contents']:
-            if os.path.splitext(os.path.basename(key['Key']))[1] in extList:
-                # local_dt = key['LastModified'].replace(tzinfo=pytz.utc).astimezone(TZ)
+            if os.path.splitext(os.path.basename(key['Key']))[1] in ext_list:
                 name = os.path.basename(key['Key'])
-                #ts = TZ.normalize(local_dt)
                 try:
                     url = s3.generate_presigned_url(
                         ClientMethod='get_object',
@@ -142,23 +136,12 @@ def get_snapshots(filename):
                             'Key': key['Key']
                         }
                     )
-                except:
-                    #  image is not part of snapshots
+                except Exception as e:
                     url = None
                 data.append({'name': name.rsplit('.', 1)[0], 'url': url})
-        if request.method == 'POST':
-            if 'submit' in request.form:
-                snapshot = Snapshot.query.join(Thing).filter(Thing.name == request.form['submit']).first()
-                snapshot.value = str(int(time.time()))
-            return render_template(
-                'snapshots.html',
-                snapshots=data)
-        else:
-            return render_template(
-                'snapshots.html',
-                snapshots=data)
-    except Exception, e:
-        return not_found_error(str(e))
+        return render_template('snapshots.html', snapshots=data)
+    except Exception as ex:
+        return not_found_error(str(ex))
 
 
 @app.route("/toggles", defaults={'toggle_id': None}, methods=["GET", "POST"])
@@ -176,7 +159,7 @@ def get_toggles(toggle_id):
         return render_template(
             'toggles.html',
             toggles=toggles)
-    except Exception, e:
+    except Exception as e:
         return not_found_error(str(e))
 
 
@@ -223,7 +206,7 @@ def new_thing():
                 db.session.add(thing)
                 db.session.commit()
                 flash("%s added successfully" % thing.name, 'success')
-            except sqlalchemy.exc.IntegrityError, exc:
+            except sqlalchemy.exc.IntegrityError as exc:
                 reason = exc.message
                 if "UNIQUE constraint" in reason:
                     flash("%s already exists" % exc.params[0], 'danger')
@@ -234,30 +217,6 @@ def new_thing():
             form=form)
     else:
         return render_template("new-thing.html", form=form)
-
-
-@app.route('/new-snapshot', methods=["GET", "POST"])
-@login_required
-def new_snapshot():
-    form = SnapshotForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            snapshot = Snapshot(thing=form.thing.data)
-            try:
-                db.session.add(snapshot)
-                db.session.commit()
-                flash("%s added successfully" % snapshot.thing.name, 'success')
-            except sqlalchemy.exc.IntegrityError, exc:
-                reason = exc.message
-                if "NOT NULL constraint" in reason:
-                    flash("Snapshot already exists", 'danger')
-                db.session.rollback()
-
-        return render_template(
-            'new-snapshot.html',
-            form=form)
-    else:
-        return render_template("new-snapshot.html", form=form)
 
 
 @app.route('/new-metric', methods=["GET", "POST"])
@@ -271,7 +230,7 @@ def new_metric():
                 db.session.add(metric)
                 db.session.commit()
                 flash("%s added successfully" % metric.thing.name, 'success')
-            except sqlalchemy.exc.IntegrityError, exc:
+            except sqlalchemy.exc.IntegrityError as exc:
                 reason = exc.message
                 if "NOT NULL constraint" in reason:
                     flash("Metric already exists", 'danger')
@@ -297,7 +256,7 @@ def new_toggle():
                 db.session.add(toggle)
                 db.session.commit()
                 flash("Added successfully", 'success')
-            except sqlalchemy.exc.IntegrityError, exc:
+            except sqlalchemy.exc.IntegrityError as exc:
                 reason = exc.message
                 if "UNIQUE constraint" in reason:
                     flash("%s already exists" % exc.params[0], 'danger')
@@ -333,7 +292,7 @@ def graph_it(thing, metric):
         graph.add(metric, x)
         graph_data = graph.render_data_uri()
         return render_template('graphing.html', graph_data=graph_data, thing=thing)
-    except Exception, e:
+    except Exception as e:
         return (str(e))
 
 

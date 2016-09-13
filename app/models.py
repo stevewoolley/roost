@@ -4,15 +4,11 @@ import datetime
 import requests
 import os
 import json
+from publisher import Publisher
 
 CERT = (os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'cert.pem'),
         os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'key.pem'))
 HEADERS = {'Content-Type': 'application/json'}
-
-
-def iot_set(endpoint, key, value):
-    payload = json.dumps({'state': {'desired': {key: value}}})
-    return requests.post(endpoint, data=payload, cert=CERT, verify=True, headers=HEADERS)
 
 
 class User(db.Model):
@@ -68,7 +64,6 @@ class Thing(db.Model):
     certificate = db.relationship('Certificate',
                                   backref=db.backref('things', lazy='dynamic'))
     metric = db.relationship('Metric', uselist=False, back_populates='thing')
-    snapshot = db.relationship('Snapshot', uselist=False, back_populates='thing')
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
@@ -121,7 +116,17 @@ class Toggle(db.Model):
 
     @value.setter
     def value(self, v):
-        iot_set(self.thing.endpoint, self.refkey, v)
+        obj = []
+        data = dict()
+        data['toggle'] = True
+        msg = json.dumps(data)
+        obj.append({'topic': self.refkey, 'payload': msg})
+        Publisher(
+            app.config['MQTT_ENDPOINT'],
+            os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'rootCA.pem'),
+            os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'key.pem'),
+            os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'cert.pem')
+        ).publish_multiple(obj)
 
     @property
     def not_value(self):
@@ -129,32 +134,6 @@ class Toggle(db.Model):
             return self.off_str
         else:
             return self.on_str
-
-    def __repr__(self):
-        return '<id {}>'.format(self.id)
-
-
-class Snapshot(db.Model):
-    __tablename__ = 'snapshots'
-    __subject__ = 'snapshot'
-
-    id = db.Column(db.Integer, primary_key=True)
-    thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
-    thing = db.relationship('Thing', back_populates=('snapshot'))
-
-    @property
-    def response(self):
-        if not hasattr(self, 'resp'):
-            self.resp = requests.get(self.thing.endpoint, cert=CERT, verify=True, headers=HEADERS)
-        return self.resp
-
-    @property
-    def value(self):
-        return self.response.json()['state']['reported'][self.__subject__]
-
-    @value.setter
-    def value(self, v):
-        iot_set(self.thing.endpoint, self.__subject__, v)
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
