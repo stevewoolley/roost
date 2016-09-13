@@ -27,9 +27,16 @@
         $("[data-toggle='tooltip']").tooltip();
     });
     </script>
+    <script type="text/javascript">
+    <!--
+    function AutoRefresh( t ) {
+       setTimeout("location.reload(true);", t);
+    }
+    //-->
+    </script>
 
 </head>
-<body>
+<body onload="JavaScript:AutoRefresh(5000);">
 <nav class="navbar navbar-inverse navbar-default">
     <div class="container">
         <div class="navbar-header">
