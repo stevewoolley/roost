@@ -1,0 +1,4 @@
+---
+- name: 'Install DB'
+  become: yes
+  copy: src=~/workspace/roost/app.db dest={{ webapps_dir }}/{{ app_name }}/src/app.db owner={{ user }} group={{ group }} mode=664

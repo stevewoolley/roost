@@ -1,0 +1,16 @@
+---
+- name: 'Upgrade to latest LTS'
+  become: yes
+  shell: do-release-upgrade -f DistUpgradeViewNonInteractive
+
+- name: 'Restart machine after upgrade'
+  become: yes
+  shell: reboot
+  async: 0
+  poll: 0
+
+- name: 'Wait for server to come back'
+  local_action:
+        wait_for host={{ansible_ssh_host | default(inventory_hostname)}}
+        state=started port=22 delay=30
+        timeout=300 connect_timeout=15

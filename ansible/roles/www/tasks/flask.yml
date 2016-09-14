@@ -1,12 +1,4 @@
 ---
-- name: 'Install flask packages'
-  action: apt pkg={{item}} state=installed
-  with_items:
-    - python-flask
-    - python-flask-sqlalchemy
-    - python-flask-login
-    - python-flaskext.wtf
-    - uwsgi-plugin-python
 
 - name: 'Ensure log directory'
   action: file dest={{ webapps_dir }}/{{ app_name }}/log state=directory
@@ -17,13 +9,27 @@
   notify:
     - restart uwsgi app
 
-- name: 'Install dependencies into virtualenv'
-  action: pip requirements={{ webapps_dir }}/{{ app_name }}/src/requirements.txt virtualenv={{ webapps_dir }}/{{ app_name }}/venv state=present
-
 - name: 'Modify flask uwsgi configuration'
   become: yes
-  template: src=config.py.j2 dest={{ webapps_dir }}/{{ app_name }}/src/config.py.example
+  template: src=config.py.j2 dest={{ webapps_dir }}/{{ app_name }}/src/config.py
 
 - name: 'Modify supervisor configuration'
   become: yes
   template: src=uwsgi.conf.j2 dest=/etc/supervisor/conf.d/uwsgi.conf
+
+- name: 'Create certs directory'
+  become: yes
+  action: file dest={{ webapps_dir }}/{{ app_name }}/src/certs state=directory owner={{ user }} group={{ group }} mode=755
+
+- name: 'Install IoT private key'
+  become: yes
+  copy: src=~/workspace/roost/certs/key.pem dest={{ webapps_dir }}/{{ app_name }}/src/certs owner={{ user }} group={{ group }} mode=640
+
+- name: 'Install IoT certificate'
+  become: yes
+  copy: src=~/workspace/roost/certs/cert.pem dest={{ webapps_dir }}/{{ app_name }}/src/certs/cert.pem owner={{ user }} group={{ group }} mode=640
+
+- name: 'Install Root CA'
+  become: yes
+  copy: src=~/workspace/roost/certs/rootCA.pem dest={{ webapps_dir }}/{{ app_name }}/src/certs/rootCA.pem owner={{ user }} group={{ group }} mode=640
+

@@ -24,3 +24,4 @@ hosts
 /ansible/roles/*/vars/main.yml
 host_vars/
 group_vars/
+venv/

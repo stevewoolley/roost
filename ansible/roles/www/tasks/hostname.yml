@@ -9,6 +9,7 @@
   become: yes
 
 - name: 'Add hostname to /etc/hosts'
+  become: yes
   lineinfile:
     dest=/etc/hosts
     line='127.0.1.1 {{ full_hostname }} {{ short_hostname }}'

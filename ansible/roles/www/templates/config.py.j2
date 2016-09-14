@@ -11,14 +11,21 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 WTF_CSRF_ENABLED = True
 
-CSRF_SESSION_KEY = "secret"
+CSRF_SESSION_KEY = "{{ secret_key }}"
 
 # Secret key for signing cookies
-SECRET_KEY = "secret"
+SECRET_KEY = "{{ secret_key }}"
 
 #
-SITE_NAME = "Smart Home"
+SITE_NAME = "{{ site_name }}"
 
 #
 CERTIFICATES_FOLDER = 'certs/'
 CERTIFICATES_BASE_FOLDER = os.path.join(BASE_DIR, CERTIFICATES_FOLDER)
+
+#
+S3_BUCKET = "{{ s3_bucket }}"
+SNAPSHOT = "{{ snapshot }}"
+AWS_REGION = "{{ aws_region }}"
+SNAPSHOT_BUCKET = "{{ snapshot_bucket }}"
+MQTT_ENDPOINT = "{{ mqtt_endpoint }}"

@@ -7,19 +7,21 @@
 
 - name: 'Update ubuntu package cache'
   become: yes
-  action: apt update_cache=yes
+  apt: update_cache=yes
 
 - name: 'Upgrade to the lastest packages'
   become: yes
-  action: apt upgrade=safe
+  apt: upgrade=dist
 
 - name: 'Install prerequisites'
-  action: apt pkg={{item}} state=installed
+  become: yes
+  apt: name={{item}} state=present
   with_items:
     - git
     - awscli
     - screen
     - sqlite3
+    - supervisor
 
 - name: 'nginx setup'
   include: nginx.yml

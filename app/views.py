@@ -243,32 +243,6 @@ def new_metric():
         return render_template("new-metric.html", form=form)
 
 
-@app.route('/new-toggle', methods=["GET", "POST"])
-@login_required
-def new_toggle():
-    form = ToggleForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            toggle = Toggle(title=form.title.data, refkey=form.refkey.data,
-                            on_str=form.on_str.data, off_str=form.off_str.data,
-                            thing=form.thing.data)
-            try:
-                db.session.add(toggle)
-                db.session.commit()
-                flash("Added successfully", 'success')
-            except sqlalchemy.exc.IntegrityError as exc:
-                reason = exc.message
-                if "UNIQUE constraint" in reason:
-                    flash("%s already exists" % exc.params[0], 'danger')
-                db.session.rollback()
-
-        return render_template(
-            'new-toggle.html',
-            form=form)
-    else:
-        return render_template("new-toggle.html", form=form)
-
-
 @app.route('/graph/<string:thing>/<string:metric>')
 @login_required
 def graph_it(thing, metric):

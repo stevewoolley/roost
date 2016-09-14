@@ -1,25 +1,26 @@
 ---
 - name: 'Install base python packages'
-  action: apt pkg={{item}} state=installed
+  become: yes
+  apt: name={{item}} state=present
   with_items:
     - python-dev
     - python-pip
     - python-virtualenv
-    - supervisor
-    - python-bcrypt
     - libffi-dev
-    - python-boto
-    - python-botocore
+    - uwsgi-plugin-python
 
 - name: 'Install supplemental python packages'
   action: pip name={{item}} virtualenv={{ webapps_dir }}/{{ app_name }}/venv state=present
   with_items:
-    - flask-bcrypt
-    - flask-mail
-    - flask-sqlalchemy
-    - flask-wtf
-    - sqlalchemy-migrate
-    - flask-whooshalchemy
+    - bcrypt
+    - flask_bcrypt
+    - flask_login
+    - flask_mail
+    - flask_sqlalchemy
+    - flask_wtf
+    - paho-mqtt
+    - sqlalchemy_migrate
+    - flask_whooshalchemy
     - requests
     - pytz
     - boto3
