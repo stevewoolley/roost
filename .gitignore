@@ -25,3 +25,4 @@ hosts
 host_vars/
 group_vars/
 venv/
+/ansible/group_vars/all.yml

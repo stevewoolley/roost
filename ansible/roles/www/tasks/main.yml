@@ -1,18 +1,4 @@
 ---
-- name: 'Set timezone'
-  include: timezone.yml
-
-- name: 'Set hostname'
-  include: hostname.yml
-
-- name: 'Update ubuntu package cache'
-  become: yes
-  apt: update_cache=yes
-
-- name: 'Upgrade to the lastest packages'
-  become: yes
-  apt: upgrade=dist
-
 - name: 'Install prerequisites'
   become: yes
   apt: name={{item}} state=present
