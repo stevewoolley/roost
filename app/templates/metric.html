@@ -11,7 +11,7 @@ Metrics <a class="btn btn-primary btn-xs" href="{{ url_for('new_metric') }}"><i 
     <div class="btn-group btn-group-xsm" role="group" aria-label="metrics">
         {% for m in metrics %}
             {% if m.id == metric.id %}
-                <a class="btn btn-default active" href="{{ url_for('get_metrics', metric_id=m.id) }}" role="button">
+                <a class="btn btn-primary active" href="{{ url_for('get_metrics', metric_id=m.id) }}" role="button">
             {% else %}
                 <a class="btn btn-default" href="{{ url_for('get_metrics', metric_id=m.id) }}" role="button">
             {% endif %}
@@ -22,7 +22,7 @@ Metrics <a class="btn btn-primary btn-xs" href="{{ url_for('new_metric') }}"><i 
 </div>
 <br/>
 <div class="row">
-    <div class="panel panel-primary">
+    <div class="panel panel-default">
         <div class="panel-heading">{{ metric.thing.name }}</div>
 
         <!-- Table -->

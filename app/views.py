@@ -156,6 +156,7 @@ def get_toggles(toggle_id):
         if request.method == 'POST':
             toggle = Toggle.query.get(int(request.form['submit']))
             toggle.toggle()
+            flash("[ %s ] fired!" % toggle.title, 'success')
         if toggle_id:
             toggles = [Toggle.query.filter(Toggle.id == toggle_id).one()]
         else:
