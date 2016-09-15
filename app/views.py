@@ -108,14 +108,18 @@ def get_things():
 @app.route('/metrics/<int:metric_id>')
 @login_required
 def get_metrics(metric_id):
-    if metric_id is None:
-        metric = Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").first()
-    else:
-        metric = Metric.query.get(metric_id)
-    return render_template(
-        'metric.html',
-        metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all(),
-        metric=metric)
+    try:
+        if metric_id is None:
+            metric = Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").first()
+        else:
+            metric = Metric.query.get(metric_id)
+        return render_template(
+            'metric.html',
+            metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all(),
+            metric=metric)
+
+    except Exception as ex:
+        return not_found_error("Metric %s not found" % metric_id)
 
 
 @app.route("/snapshots", methods=["GET"])
@@ -267,7 +271,7 @@ def graph_it(thing, metric):
         graph_data = graph.render_data_uri()
         return render_template('graphing.html', graph_data=graph_data, thing=thing)
     except Exception as e:
-        return (str(e))
+        return internal_error(str(e))
 
 
 @app.template_filter('dt')
