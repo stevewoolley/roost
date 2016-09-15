@@ -98,6 +98,7 @@ class Toggle(db.Model):
     topic = db.Column(db.String(200), nullable=False)
     ref_key = db.Column(db.String(50), nullable=False)
     ref_value = db.Column(db.String(100), nullable=False)
+    style = db.Column(db.String(100), nullable=False)
 
     def toggle(self):
         data = dict()

@@ -46,3 +46,4 @@ class ToggleForm(Form):
     topic = StringField('topic', [validators.InputRequired(), validators.Length(max=200)])
     ref_key = StringField('ref_key', [validators.InputRequired(), validators.Length(max=50)])
     ref_value = StringField('ref_value', [validators.InputRequired(), validators.Length(max=100)])
+    style = StringField('style', [validators.InputRequired(), validators.Length(max=100)])
