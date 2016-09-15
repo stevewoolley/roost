@@ -43,9 +43,6 @@ class SnapshotForm(Form):
 
 class ToggleForm(Form):
     title = StringField('title', [validators.InputRequired(), validators.Length(max=100)])
-    refkey = StringField('refkey', [validators.InputRequired(), validators.Length(max=50)])
-    on_str = StringField('on_str', [validators.InputRequired(), validators.Length(max=50)])
-    off_str = StringField('off_str', [validators.InputRequired(), validators.Length(max=50)])
-    thing_id = IntegerField('thing_id')
-    thing = QuerySelectField(query_factory=enabled_things, get_label='name',
-                             allow_blank=False)
+    topic = StringField('topic', [validators.InputRequired(), validators.Length(max=200)])
+    ref_key = StringField('ref_key', [validators.InputRequired(), validators.Length(max=50)])
+    ref_value = StringField('ref_value', [validators.InputRequired(), validators.Length(max=100)])

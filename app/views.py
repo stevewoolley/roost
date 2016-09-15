@@ -154,15 +154,13 @@ def get_snapshots():
 def get_toggles(toggle_id):
     try:
         if request.method == 'POST':
-            toggle = Toggle.query.get(int(request.form['submit'].split('-', 1)[0]))
-            toggle.value = request.form['submit'].split('-', 1)[1]
+            toggle = Toggle.query.get(int(request.form['submit']))
+            toggle.toggle()
         if toggle_id:
             toggles = [Toggle.query.filter(Toggle.id == toggle_id).one()]
         else:
             toggles = Toggle.query.order_by("title").all()
-        return render_template(
-            'toggles.html',
-            toggles=toggles)
+        return render_template('toggles.html', toggles=toggles)
     except Exception as e:
         return not_found_error(str(e))
 

@@ -11,8 +11,8 @@
         <div class="btn-group-vertical" role="group" aria-label="Toggles">
             {%- for toggle in toggles %}
             <button type="submit" class="btn btn-default btn-lg" name="submit" style="text-align:left; padding-left:6px"
-                    value="{{ toggle.id }}-{{ toggle.not_value }}">
-                    <i class="glyphicon glyphicon-adjust"></i> {{ toggle.title }} {{ toggle.not_value }}
+                    value="{{ toggle.id }}">
+                    <i class="glyphicon glyphicon-adjust"></i> {{ toggle.title }}
             </button>
             {%- endfor %}
         </div>

@@ -94,46 +94,23 @@ class Toggle(db.Model):
     __tablename__ = 'toggles'
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), unique=True, nullable=False)
-    refkey = db.Column(db.String(50), nullable=False)
-    on_str = db.Column(db.String(50), nullable=False)
-    off_str = db.Column(db.String(50), nullable=False)
-    thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
-    thing = db.relationship('Thing', backref=db.backref('toggles', lazy='dynamic'))
+    title = db.Column(db.String(100), nullable=False)
+    topic = db.Column(db.String(200), nullable=False)
+    ref_key = db.Column(db.String(50), nullable=False)
+    ref_value = db.Column(db.String(100), nullable=False)
 
-    @property
-    def response(self):
-        if not hasattr(self, 'resp'):
-            self.resp = requests.get(self.thing.endpoint, cert=CERT, verify=True, headers=HEADERS)
-        return self.resp
-
-    @property
-    def value(self):
-        if self.refkey in self.response.json()['state']['reported']:
-            return self.response.json()['state']['reported'][self.refkey]
-        else:
-            return None
-
-    @value.setter
-    def value(self, v):
-        obj = []
+    def toggle(self):
         data = dict()
-        data['toggle'] = True
+        data[self.ref_key] = self.ref_value
+        obj = []
         msg = json.dumps(data)
-        obj.append({'topic': self.refkey, 'payload': msg})
+        obj.append({'topic': self.topic, 'payload': msg})
         Publisher(
             app.config['MQTT_ENDPOINT'],
             os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'rootCA.pem'),
             os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'key.pem'),
             os.path.join(app.config['CERTIFICATES_BASE_FOLDER'], 'cert.pem')
         ).publish_multiple(obj)
-
-    @property
-    def not_value(self):
-        if self.value == self.on_str:
-            return self.off_str
-        else:
-            return self.on_str
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
