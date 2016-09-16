@@ -124,8 +124,8 @@ def get_metrics(metric_id):
         return not_found_error("Metric %s not found" % metric_id)
 
 
-@app.route('/shadows/<string:thing>', methods=["GET"])
-@app.route('/shadow/<string:thing>', methods=["GET"])
+@app.route('/shadows/<thing>', methods=["GET"])
+@app.route('/shadow/<thing>', methods=["GET"])
 @login_required
 def get_shadow(thing):
     try:
