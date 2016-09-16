@@ -257,6 +257,12 @@ def axis_max_calc(v):
         return 10
     if v < 20:
         return 20
+    if v < 25:
+        return 25
+    if v < 30:
+        return 30
+    if v < 40:
+        return 40
     if v < 50:
         return 50
     if v <= 100:
@@ -270,7 +276,7 @@ def axis_max_calc(v):
 
 @app.route('/graph/<string:thing>/<string:metric>')
 @login_required
-def graph_it(thing, metric, query_limit=2016):
+def graph_it(thing, metric, query_limit=4000):
     y_min = 0
     y_max = 0
     try:
