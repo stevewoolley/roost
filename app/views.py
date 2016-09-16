@@ -4,11 +4,13 @@ from flask_login import login_user, logout_user, current_user, login_required
 from flask_bcrypt import Bcrypt
 from app import app, db, login_manager
 from .models import User, Certificate, Thing, Metric, Toggle
-from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm, ToggleForm
+from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm
 import sqlalchemy
-import datetime, time
+import datetime
+import json
 import pytz
 import boto3
+import botocore
 from boto3.dynamodb.conditions import Key, Attr
 import pygal
 
@@ -120,6 +122,22 @@ def get_metrics(metric_id):
 
     except Exception as ex:
         return not_found_error("Metric %s not found" % metric_id)
+
+
+@app.route('/shadows/<string:thing>', methods=["GET"])
+@app.route('/shadow/<string:thing>', methods=["GET"])
+@login_required
+def get_shadow(thing):
+    try:
+        client = boto3.client('iot-data', region_name=app.config['AWS_REGION'])
+        response = client.get_thing_shadow(thingName=thing)
+        body = response["payload"]
+        state = json.loads(body.read())
+        return render_template('shadow.html', name=thing, metrics=state)
+    except IOError as ex:
+        return not_found_error("%s not found" % thing)
+    except botocore.exceptions.ClientError as ex:
+        return not_found_error("%s not found" % thing)
 
 
 @app.route("/snapshots", methods=["GET"])
@@ -246,31 +264,25 @@ def new_metric():
         return render_template("new-metric.html", form=form)
 
 
+# Ugly function to make y axis max range a bit more viewable
 def axis_max_calc(v):
-    if v < 1:
-        return 1
-    if v < 2:
-        return 2
-    if v < 5:
-        return 5
-    if v <= 10:
-        return 10
-    if v < 20:
-        return 20
-    if v < 25:
-        return 25
-    if v < 30:
-        return 30
-    if v < 40:
-        return 40
-    if v < 50:
-        return 50
-    if v <= 100:
-        return 100
-    if v <= 1000:
-        return 1000
-    if v <= 10000:
-        return 10000
+    pairs = [
+        (1.00001, 1),
+        (2, 2),
+        (5, 5),
+        (10.00001, 10),
+        (20, 20),
+        (25, 25),
+        (30, 30),
+        (40, 40),
+        (50, 50),
+        (100.00001, 100),
+        (1000.00001, 1000),
+        (10000.00001, 10000)
+    ]
+    for pair in pairs:
+        if v < pair[0]:
+            return pair[1]
     return v
 
 

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block footer %}
+{% endblock %}
+
+
+{% block content %}
+{% include 'flash.html' %}
+
+<div class="page-header"><h2>{{ name }}</h2></div>
+
+<div class="row">
+    <div class="panel panel-default">
+        <!-- Table -->
+        <table class="table">
+            <tbody>
+            {% for key, value in metrics['state']['reported'].iteritems()|sort %}
+            <tr>
+                <td>
+                    {{ key }}
+                </td>
+                <td>
+                    <div> {{ value }}</div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
