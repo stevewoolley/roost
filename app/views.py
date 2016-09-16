@@ -246,9 +246,33 @@ def new_metric():
         return render_template("new-metric.html", form=form)
 
 
+def axis_max_calc(v):
+    if v < 1:
+        return 1
+    if v < 2:
+        return 2
+    if v < 5:
+        return 5
+    if v <= 10:
+        return 10
+    if v < 20:
+        return 20
+    if v < 50:
+        return 50
+    if v <= 100:
+        return 100
+    if v <= 1000:
+        return 1000
+    if v <= 10000:
+        return 10000
+    return v
+
+
 @app.route('/graph/<string:thing>/<string:metric>')
 @login_required
-def graph_it(thing, metric):
+def graph_it(thing, metric, query_limit=2016):
+    y_min = 0
+    y_max = 0
     try:
         dynamodb = boto3.resource('dynamodb', region_name=app.config['AWS_REGION'])
         table = dynamodb.Table('sensors')
@@ -256,16 +280,25 @@ def graph_it(thing, metric):
             KeyConditionExpression=Key('source').eq(thing),
             ScanIndexForward=False,
             FilterExpression=Attr('payload.state.reported.' + metric).exists(),
-            Limit=2016
+            Limit=query_limit
         )
-        graph = pygal.DateTimeLine(show_legend=False, show_dots=False, x_label_rotation=35, truncate_label=-1,
+        graph = pygal.DateTimeLine(show_legend=False,
+                                   show_dots=False,
+                                   x_label_rotation=35,
+                                   truncate_label=-1,
                                    x_value_formatter=lambda dt: dt.strftime(DT_FORMAT))
         graph.title = metric
         x = []
         for i in response['Items']:
-            x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0).replace(
-                tzinfo=pytz.utc).astimezone(TZ),
-                      i['payload']['state']['reported'][metric]))
+            if i['payload']['state']['reported'][metric] is not None:
+                x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0).replace(
+                    tzinfo=pytz.utc).astimezone(TZ),
+                          i['payload']['state']['reported'][metric]))
+                if i['payload']['state']['reported'][metric] > y_max:
+                    y_max = i['payload']['state']['reported'][metric]
+                if i['payload']['state']['reported'][metric] < y_min:
+                    y_min = i['payload']['state']['reported'][metric]
+        graph.config.range = (y_min, axis_max_calc(y_max))
         graph.add(metric, x)
         graph_data = graph.render_data_uri()
         return render_template('graphing.html', graph_data=graph_data, thing=thing)
