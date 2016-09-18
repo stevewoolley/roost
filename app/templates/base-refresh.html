@@ -56,7 +56,7 @@
                 {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('get_toggles') }}"><span class="glyphicon glyphicon-adjust"
                                                                  aria-hidden="true"></span> Toggles</a></li>
-                <li><a href="{{ url_for('get_metrics') }}"><span class="glyphicon glyphicon-stats"
+                <li><a href="{{ url_for('get_shadow') }}"><span class="glyphicon glyphicon-stats"
                                                                  aria-hidden="true"></span> Metrics</a></li>
                 <li><a href="{{ url_for('get_snapshots') }}"><span class="glyphicon glyphicon-camera"
                                                                    aria-hidden="true"></span> Snapshots</a></li>
@@ -68,12 +68,6 @@
                     <ul class="dropdown-menu">
                         <li><a href="{{ url_for('get_users') }}"><span class="glyphicon glyphicon-user"
                                                                        aria-hidden="true"></span> Users</a></li>
-                        <li><a href="{{ url_for('get_certificates') }}"><span class="glyphicon glyphicon-certificate"
-                                                                              aria-hidden="true"></span>
-                            Certificates</a></li>
-                        <li><a href="{{ url_for('get_things') }}"><span class="glyphicon glyphicon-cloud"
-                                                                        aria-hidden="true"></span> Things</a></li>
-
                     </ul>
                 </li>
                 {% endif %}

@@ -3,9 +3,8 @@ from flask import request, render_template, flash, redirect, url_for
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_bcrypt import Bcrypt
 from app import app, db, login_manager
-from .models import User, Certificate, Thing, Metric, Toggle
-from .forms import LoginForm, CertificateUploadForm, ThingForm, MetricForm
-import sqlalchemy
+from .models import User, Toggle
+from .forms import LoginForm
 import datetime
 import json
 import pytz
@@ -108,40 +107,6 @@ def get_users():
         users=User.query.all())
 
 
-@app.route("/certificates", methods=["GET"])
-@login_required
-def get_certificates():
-    return render_template(
-        'certificates.html',
-        certificates=Certificate.query.all())
-
-
-@app.route("/things", methods=["GET"])
-@login_required
-def get_things():
-    return render_template(
-        'things.html',
-        things=Thing.query.order_by("name").all())
-
-
-@app.route("/metrics", defaults={'metric_id': None}, methods=["GET"])
-@app.route('/metrics/<int:metric_id>')
-@login_required
-def get_metrics(metric_id):
-    try:
-        if metric_id is None:
-            metric = Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").first()
-        else:
-            metric = Metric.query.get(metric_id)
-        return render_template(
-            'metric.html',
-            metrics=Metric.query.join(Thing, Metric.thing_id == Thing.id).order_by("things.name").all(),
-            metric=metric)
-
-    except Exception as ex:
-        return not_found_error("Metric %s not found" % metric_id)
-
-
 @app.route('/shadows/<thing>', methods=["GET"])
 @app.route('/shadow/<thing>', methods=["GET"])
 @app.route("/shadow", defaults={'thing': None}, methods=["GET"])
@@ -208,86 +173,6 @@ def get_toggles(toggle_id):
         return render_template('toggles.html', toggles=toggles)
     except Exception as e:
         return not_found_error(str(e))
-
-
-@app.route('/new-certificate', methods=["GET", "POST"])
-@login_required
-def new_certificate():
-    form = CertificateUploadForm()
-    if request.method == 'POST':
-        # validate uploads
-        filedata = []
-        two_good_files = True
-        if form.validate_on_submit():
-            for upload in form.uploads.entries:
-                filedata.append(upload)
-                if not upload.data.filename:  # file is invalid if filename empty
-                    two_good_files = False
-        if not two_good_files:
-            flash("Must enter two files", 'warning')
-            return render_template('new-certificate.html', form=form)
-        # store certificate record
-        certificate = Certificate(name=form.name.data)
-        db.session.add(certificate)
-        db.session.commit()
-        # store the physical files not that I have an id
-        filedata[0].data.save(os.path.join(app.config['CERTIFICATES_FOLDER'], str(certificate.id) + '-cert.pem'))
-        filedata[1].data.save(os.path.join(app.config['CERTIFICATES_FOLDER'], str(certificate.id) + '-key.pem'))
-        return render_template(
-            'new-certificate.html',
-            form=form,
-            filedata=filedata)
-    else:
-        return render_template("new-certificate.html", form=form)
-
-
-@app.route('/new-thing', methods=["GET", "POST"])
-@login_required
-def new_thing():
-    form = ThingForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            thing = Thing(name=form.name.data, endpoint=form.endpoint.data,
-                          certificate=form.certificate.data)
-            try:
-                db.session.add(thing)
-                db.session.commit()
-                flash("%s added successfully" % thing.name, 'success')
-            except sqlalchemy.exc.IntegrityError as exc:
-                reason = exc.message
-                if "UNIQUE constraint" in reason:
-                    flash("%s already exists" % exc.params[0], 'danger')
-                db.session.rollback()
-
-        return render_template(
-            'new-thing.html',
-            form=form)
-    else:
-        return render_template("new-thing.html", form=form)
-
-
-@app.route('/new-metric', methods=["GET", "POST"])
-@login_required
-def new_metric():
-    form = MetricForm()
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            metric = Metric(thing=form.thing.data)
-            try:
-                db.session.add(metric)
-                db.session.commit()
-                flash("%s added successfully" % metric.thing.name, 'success')
-            except sqlalchemy.exc.IntegrityError as exc:
-                reason = exc.message
-                if "NOT NULL constraint" in reason:
-                    flash("Metric already exists", 'danger')
-                db.session.rollback()
-
-            return render_template(
-                'new-metric.html',
-                form=form)
-    else:
-        return render_template("new-metric.html", form=form)
 
 
 # Ugly function to make y axis max range a bit more viewable

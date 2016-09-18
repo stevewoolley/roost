@@ -43,53 +43,6 @@ class User(db.Model):
         return self.email
 
 
-class Certificate(db.Model):
-    __tablename__ = 'certificates'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    created_at = db.Column('created_at', DateTime, default=datetime.datetime.now)
-
-    def __repr__(self):
-        return '<id {}>'.format(self.id)
-
-
-class Thing(db.Model):
-    __tablename__ = 'things'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    endpoint = db.Column(db.String(250), nullable=False)
-    certificate_id = db.Column(db.Integer, db.ForeignKey('certificates.id'))
-    certificate = db.relationship('Certificate',
-                                  backref=db.backref('things', lazy='dynamic'))
-    metric = db.relationship('Metric', uselist=False, back_populates='thing')
-
-    def __repr__(self):
-        return '<id {}>'.format(self.id)
-
-
-class Metric(db.Model):
-    __tablename__ = 'metrics'
-
-    id = db.Column(db.Integer, primary_key=True)
-    thing_id = db.Column(db.Integer, db.ForeignKey('things.id'), nullable=False)
-    thing = db.relationship('Thing', back_populates=('metric'))
-
-    @property
-    def response(self):
-        if not hasattr(self, 'resp'):
-            self.resp = requests.get(self.thing.endpoint, cert=CERT, verify=True, headers=HEADERS)
-        return self.resp
-
-    @property
-    def items(self):
-        return self.response
-
-    def __repr__(self):
-        return '<id {}>'.format(self.id)
-
-
 class Toggle(db.Model):
     __tablename__ = 'toggles'
 
