@@ -119,12 +119,13 @@ def get_shadow(thing):
     if thing not in things:
         return not_found_error("%s not found" % thing)
     try:
+        ts = None
         t = get_only_the_thing(thing)
         if utils.has_key_chain(t, 'state', 'reported'):
-            t = t['state']['reported']
+            ts = t['timestamp']
         else:
             t = {}
-        return render_template('shadow.html', name=thing, things=things, thing=t)
+        return render_template('shadow.html', name=thing, things=things, thing=t, ts=ts)
     except IOError as ex:
         return not_found_error("%s not found" % thing)
     except botocore.exceptions.ClientError as ex:
@@ -219,14 +220,15 @@ def graph_it(thing, metric, query_limit=4000):
         graph.title = metric
         x = []
         for i in response['Items']:
-            if i['payload']['state']['reported'][metric] is not None:
+            v = i['payload']['state']['reported'][metric]
+            if v is not None:
                 x.append((datetime.datetime.fromtimestamp(float(i['timestamp']) / 1000.0).replace(
                     tzinfo=pytz.utc).astimezone(TZ),
-                          i['payload']['state']['reported'][metric]))
-                if i['payload']['state']['reported'][metric] > y_max:
-                    y_max = i['payload']['state']['reported'][metric]
-                if i['payload']['state']['reported'][metric] < y_min:
-                    y_min = i['payload']['state']['reported'][metric]
+                          v))
+                if v > y_max:
+                    y_max = v
+                if v < y_min:
+                    y_min = v
         graph.config.range = (y_min, axis_max_calc(y_max))
         graph.add(metric, x)
         graph_data = graph.render_data_uri()

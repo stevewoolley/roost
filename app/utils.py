@@ -1,6 +1,3 @@
-import boto3
-
-
 def l_search(l, k, v):
     result = [element for element in l if element[k] == v]
     if len(result) == 0:

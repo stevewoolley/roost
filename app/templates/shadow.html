@@ -20,27 +20,36 @@
     </div>
 </div>
 <br/>
-
 <div class="row">
     <div class="panel panel-default">
         <!-- Table -->
         <table class="table">
             <tbody>
-            {% for key, value in thing.iteritems()|sort %}
-            <tr>
-                <td>
-                    {{ key }}
-                    {% if value is number %}
-                      <a href="{{ url_for('graph_it',thing=name,metric=key) }}"><i class="glyphicon glyphicon-stats"></i></a>
-                    {% endif %}
-                </td>
-                <td>
-                    <div> {{ value }}</div>
-                </td>
-            </tr>
-            {% endfor %}
+            {% if thing|length > 0 %}
+                {% for key, value in thing['state']['reported'].iteritems()|sort %}
+                <tr>
+                    <td>
+                        {{ key }}
+                        {% if value is number %}
+                        <a href="{{ url_for('graph_it',thing=name,metric=key) }}"><i class="glyphicon glyphicon-stats"></i></a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div data-toggle="tooltip" title
+                             data-original-title="{{ thing['metadata']['reported'][key]['timestamp']|ts }}"
+                             data-placement="left">{{ value }}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
             </tbody>
         </table>
     </div>
 </div>
+{% if thing|length > 0 %}
+<div>Queried: {{ ts | ts }}</div>
+<br/>
+{% endif %}
+
 {% endblock %}
