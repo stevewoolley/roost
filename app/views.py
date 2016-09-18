@@ -13,9 +13,27 @@ import boto3
 import botocore
 from boto3.dynamodb.conditions import Key, Attr
 import pygal
+import utils
 
 DT_FORMAT = '%Y/%m/%d %-I:%M %p %Z'
 TZ = pytz.timezone("America/New_York")
+
+
+def get_all_the_things():
+    client = boto3.client('iot', region_name=app.config['AWS_REGION'])
+    response = client.list_things()
+    things = response["things"]
+    t = []
+    for thing in things:
+        t.append(thing['thingName'])
+    return sorted(t)
+
+
+def get_only_the_thing(thing):
+    client = boto3.client('iot-data', region_name=app.config['AWS_REGION'])
+    response = client.get_thing_shadow(thingName=thing)
+    body = response["payload"]
+    return json.loads(body.read())
 
 
 @login_manager.user_loader
@@ -126,14 +144,22 @@ def get_metrics(metric_id):
 
 @app.route('/shadows/<thing>', methods=["GET"])
 @app.route('/shadow/<thing>', methods=["GET"])
+@app.route("/shadow", defaults={'thing': None}, methods=["GET"])
+@app.route("/shadows", defaults={'thing': None}, methods=["GET"])
 @login_required
 def get_shadow(thing):
+    things = get_all_the_things()
+    if thing is None:
+        thing = things[0]
+    if thing not in things:
+        return not_found_error("%s not found" % thing)
     try:
-        client = boto3.client('iot-data', region_name=app.config['AWS_REGION'])
-        response = client.get_thing_shadow(thingName=thing)
-        body = response["payload"]
-        state = json.loads(body.read())
-        return render_template('shadow.html', name=thing, metrics=state)
+        t = get_only_the_thing(thing)
+        if utils.has_key_chain(t, 'state', 'reported'):
+            t = t['state']['reported']
+        else:
+            t = {}
+        return render_template('shadow.html', name=thing, things=things, thing=t)
     except IOError as ex:
         return not_found_error("%s not found" % thing)
     except botocore.exceptions.ClientError as ex:

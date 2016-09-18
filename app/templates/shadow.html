@@ -6,17 +6,33 @@
 {% block content %}
 {% include 'flash.html' %}
 
-<div class="page-header"><h2>{{ name }}</h2></div>
+<div class="row">
+    <div class="btn-group btn-group-xsm" role="group" aria-label="metrics">
+        {% for t in things %}
+        {% if name == t %}
+        <a class="btn btn-primary active" href="{{ url_for('get_shadow', thing=t) }}" role="button">
+            {% else %}
+            <a class="btn btn-default" href="{{ url_for('get_shadow', thing=t) }}" role="button">
+                {% endif %}
+                {{ t }}
+            </a>
+            {% endfor %}
+    </div>
+</div>
+<br/>
 
 <div class="row">
     <div class="panel panel-default">
         <!-- Table -->
         <table class="table">
             <tbody>
-            {% for key, value in metrics['state']['reported'].iteritems()|sort %}
+            {% for key, value in thing.iteritems()|sort %}
             <tr>
                 <td>
                     {{ key }}
+                    {% if value is number %}
+                      <a href="{{ url_for('graph_it',thing=name,metric=key) }}"><i class="glyphicon glyphicon-stats"></i></a>
+                    {% endif %}
                 </td>
                 <td>
                     <div> {{ value }}</div>
