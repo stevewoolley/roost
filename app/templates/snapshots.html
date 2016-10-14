@@ -1,28 +1,33 @@
-{% extends "base-refresh.html" %}
+{% extends "base.html" %}
 {% block footer %}
 Snapshots
 {% endblock %}
 {% block content %}
 {% include 'flash.html' %}
-<form method="POST">
-    <div class="row">
-        {%- for snapshot in snapshots %}
-        <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="row">
-                        <div class="col-md-6">{{ snapshot.name }}</div>
-                        <div class="col-md-6 text-right">
-                        </div>
+<div class="row">
+    {%- for snapshot in snapshots %}
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-md-6">{{ snapshot.name }}</div>
+                    <div class="col-md-6 text-right">
                     </div>
                 </div>
-                <div class="span1"><img class="img-responsive center-block" src="{{ snapshot.url }}"/></div>
             </div>
+            <div class="span1"><img class="img-responsive center-block" src="{{ snapshot.url }}&time=..."/></div>
         </div>
-        {%- endfor %}
     </div>
-    </p>
-</form>
-
+    {%- endfor %}
+</div>
+</p>
+<script>
+setInterval(function() {
+  var images = document.images;
+  for (var i=0; i<images.length; i++) {
+      images[i].src = images[i].src.replace(/\btime=[^&]*/, 'time=' + new Date().getTime());
+  }
+}, 5000); // 10000 milliseconds = 10 seconds
+</script>
 {% endblock %}
 
