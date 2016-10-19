@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 {% block footer %}
-Snapshots
 {% endblock %}
+
 {% block content %}
-{% include 'flash.html' %}
 <div class="row">
     {%- for snapshot in snapshots %}
     <div class="col-md-6">
