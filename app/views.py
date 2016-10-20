@@ -166,12 +166,13 @@ def get_toggles(toggle_id):
         if request.method == 'POST':
             toggle = Toggle.query.get(int(request.form['submit']))
             toggle.toggle()
-            flash("%s fired!" % toggle.title, 'success')
+            flash("%s fired" % toggle.title, 'success')
         if toggle_id:
             toggles = [Toggle.query.filter(Toggle.id == toggle_id).one()]
         else:
             toggles = Toggle.query.order_by("title").all()
-        return render_template('toggles.html', toggles=toggles)
+        ts = datetime.datetime.now()
+        return render_template('toggles.html', toggles=toggles, ts=ts)
     except Exception as e:
         return not_found_error(str(e))
 

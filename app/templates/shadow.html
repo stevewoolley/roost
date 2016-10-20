@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block footer %}
+{% if thing|length > 0 %}
+<div>Queried: {{ ts | ts }}</div>
+{% endif %}
 {% endblock %}
 {% block content %}
 
@@ -44,9 +47,5 @@
         </table>
     </div>
 </div>
-{% if thing|length > 0 %}
-<div>Queried: {{ ts | ts }}</div>
-<br/>
-{% endif %}
 
 {% endblock %}
