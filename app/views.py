@@ -4,12 +4,13 @@ from flask_login import login_user, logout_user, current_user, login_required
 from flask_bcrypt import Bcrypt
 from app import app, db, login_manager
 from .models import User, Toggle
-from .forms import LoginForm
+from .forms import LoginForm, ToggleForm
 import datetime
 import json
 import pytz
 import boto3
 import botocore
+import sqlalchemy
 from boto3.dynamodb.conditions import Key, Attr
 import pygal
 import utils
@@ -175,6 +176,49 @@ def get_toggles(toggle_id):
         return render_template('toggles.html', toggles=toggles, ts=ts)
     except Exception as e:
         return not_found_error(str(e))
+
+
+@app.route('/new-toggle', methods=["GET", "POST"])
+@login_required
+def new_toggle():
+    form = ToggleForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            toggle = Toggle(title=form.title.data, topic=form.topic.data,
+                            ref_key=form.ref_key.data, ref_value=form.ref_value.data,
+                            style=form.style.data)
+            try:
+                db.session.add(toggle)
+                db.session.commit()
+                flash("Added successfully", 'success')
+            except sqlalchemy.exc.IntegrityError as exc:
+                reason = exc.message
+                if "UNIQUE constraint" in reason:
+                    flash("%s already exists" % exc.params[0], 'danger')
+                db.session.rollback()
+
+        return render_template(
+            'new-toggle.html',
+            form=form)
+    else:
+        return render_template("new-toggle.html", form=form)
+
+
+@app.route("/list-toggles", methods=["GET"])
+@login_required
+def list_toggles():
+    return render_template(
+        'list-toggles.html',
+        toggles=Toggle.query.all())
+
+
+@app.route('/toggles/delete/<int:id>', methods=['GET'])
+def remove(id):
+    """Delete a toggle."""
+    toggle = Toggle.query.get_or_404(id)
+    db.session.delete(toggle)
+    db.session.commit()
+    return redirect(url_for('list_toggles'))
 
 
 # Ugly function to make y axis max range a bit more viewable

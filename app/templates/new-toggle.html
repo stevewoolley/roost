@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header"><h2>New Toggle</h2></div>
+<form method="POST">
+    {% include 'flash.html' %}
+    {% include 'form-errors.html' %}
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.title.label('Title') }} {{ form.title(class_="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.topic.label('Topic') }} {{ form.topic(class_="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.ref_key.label('Reference Key') }} {{ form.ref_key(class_="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.ref_value.label('Reference Value') }} {{ form.ref_value(class_="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.style.label('Style') }} {{ form.style(class_="form-control") }}
+    </div>
+    <input type="submit" class="btn btn-primary" value="Submit">
+</form>
+{% endblock %}
