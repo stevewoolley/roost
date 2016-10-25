@@ -36,6 +36,28 @@ def get_only_the_thing(thing):
     return json.loads(body.read())
 
 
+# Ugly function to make y axis max range a bit more viewable
+def axis_max_calc(v):
+    pairs = [
+        (1.00001, 1),
+        (2, 2),
+        (5, 5),
+        (10.00001, 10),
+        (20, 20),
+        (25, 25),
+        (30, 30),
+        (40, 40),
+        (50, 50),
+        (100.00001, 100),
+        (1000.00001, 1000),
+        (10000.00001, 10000)
+    ]
+    for pair in pairs:
+        if v < pair[0]:
+            return pair[1]
+    return v
+
+
 @login_manager.user_loader
 def load_user(email):
     return User.query.filter(User.email == email).first()
@@ -133,14 +155,18 @@ def get_shadow(thing):
         return not_found_error("%s not found" % thing)
 
 
-@app.route("/snapshots", methods=["GET"])
+@app.route("/snapshots", defaults={'prefix': None}, methods=["GET"])
+@app.route('/snapshots/<string:prefix>', methods=["GET"])
 @login_required
-def get_snapshots():
+def get_snapshots(prefix):
     s3 = boto3.client('s3')
     ext_list = ['.jpg', '.png', '.gif']
     data = []
+    prfx = ''
+    if prefix is not None:
+        prfx = prefix
     try:
-        for key in s3.list_objects(Bucket=app.config['SNAPSHOT_BUCKET'])['Contents']:
+        for key in s3.list_objects(Bucket=app.config['SNAPSHOT_BUCKET'], Prefix=prfx)['Contents']:
             if os.path.splitext(os.path.basename(key['Key']))[1] in ext_list:
                 name = os.path.basename(key['Key'])
                 try:
@@ -219,28 +245,6 @@ def remove(id):
     db.session.delete(toggle)
     db.session.commit()
     return redirect(url_for('list_toggles'))
-
-
-# Ugly function to make y axis max range a bit more viewable
-def axis_max_calc(v):
-    pairs = [
-        (1.00001, 1),
-        (2, 2),
-        (5, 5),
-        (10.00001, 10),
-        (20, 20),
-        (25, 25),
-        (30, 30),
-        (40, 40),
-        (50, 50),
-        (100.00001, 100),
-        (1000.00001, 1000),
-        (10000.00001, 10000)
-    ]
-    for pair in pairs:
-        if v < pair[0]:
-            return pair[1]
-    return v
 
 
 @app.route('/graph/<string:thing>/<string:metric>')
